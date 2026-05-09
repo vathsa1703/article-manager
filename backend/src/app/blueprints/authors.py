@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
@@ -18,7 +19,7 @@ authors_bp = Blueprint("authors", __name__, url_prefix="/authors")
 @authors_bp.route("")
 @jwt_required()
 @get_user_id
-def list_authors(user_id):
+def list_authors(user_id: int):
     stmt = select(Author).where(Author.user_id == user_id)
     authors = db.session.execute(stmt).scalars().all()
     logger.debug("Listed %d authors for user_id=%d", len(authors), user_id)
@@ -28,7 +29,7 @@ def list_authors(user_id):
 @authors_bp.route("/top")
 @jwt_required()
 @get_user_id
-def list_top_authors(user_id):
+def list_top_authors(user_id: int):
     nb_articles = func.count(Article.id).label("nb_articles")
     stmt = (
         select(Author, nb_articles)
@@ -54,11 +55,16 @@ def list_top_authors(user_id):
 @jwt_required()
 @validate_json
 @get_user_id
-def add_author(data, user_id):
+def add_author(data: dict[str, Any], user_id: int):
     schema = BasicSchema.model_validate(data)
     author = get_or_create_by_name(Author, schema.name, user_id)
     db.session.commit()
-    logger.info("Author created/retrieved: id=%d name=%r user_id=%d", author.id, author.name, user_id)
+    logger.info(
+        "Author created/retrieved: id=%d name=%r user_id=%d",
+        author.id,
+        author.name,
+        user_id,
+    )
     return jsonify(author.to_dict()), 201
 
 
@@ -66,7 +72,7 @@ def add_author(data, user_id):
 @jwt_required()
 @validate_json
 @get_user_id
-def delete_authors(data, user_id):
+def delete_authors(data: dict[str, Any], user_id: int):
     schema = IDSchema.model_validate(data)
     author_ids = schema.ids
     authors = get_entities(author_ids, Author, user_id)
@@ -74,14 +80,20 @@ def delete_authors(data, user_id):
     for author in authors:
         articles = get_articles_by_author(author.id, user_id)
         if articles:
-            logger.warning("Delete author blocked — has articles: author_id=%d user_id=%d", author.id, user_id)
+            logger.warning(
+                "Delete author blocked — has articles: author_id=%d user_id=%d",
+                author.id,
+                user_id,
+            )
             return (
                 jsonify({"error": f"The author {author.id} has associated articles."}),
                 409,
             )
         db.session.delete(author)
     db.session.commit()
-    logger.info("Authors deleted: ids=%s user_id=%d count=%d", schema.ids, user_id, len(authors))
+    logger.info(
+        "Authors deleted: ids=%s user_id=%d count=%d", schema.ids, user_id, len(authors)
+    )
     return (
         jsonify(
             {

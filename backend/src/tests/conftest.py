@@ -18,7 +18,6 @@ def parse_cookies(cookies: list[str], name: str) -> str | None:
 
 def get_cookie_value(response: Response, name: str):
     cookies = response.headers.getlist("Set-Cookie")
-    print(cookies)
     return parse_cookies(cookies, name)
 
 
@@ -172,7 +171,6 @@ def create_list_authors_articles(auth_client, list_authors, list_articles):
         assert r.status_code == 201
     for article in list_articles:
         r = auth_client.post("/articles", json=article)
-        print(r.get_json())
         assert r.status_code == 201
 
 
@@ -202,6 +200,21 @@ def mock_article():
         "liked": False,
         "author": "A famous author",
         "tags": ["Science-fiction"],
+    }
+
+
+@pytest.fixture()
+def mock_article_2():
+    return {
+        "title": "Another article",
+        "url": "https://example.com/article-2",
+        "year": 2024,
+        "summary": "A longer summary",
+        "consulted": True,
+        "read_later": True,
+        "liked": True,
+        "author": "Another famous author",
+        "tags": ["Thriller"],
     }
 
 

@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
@@ -18,7 +19,7 @@ tags_bp = Blueprint("tags", __name__, url_prefix="/tags")
 @tags_bp.route("")
 @jwt_required()
 @get_user_id
-def list_tags(user_id):
+def list_tags(user_id: int):
     stmt = select(Tag).where(Tag.user_id == user_id)
     tags = db.session.execute(stmt).scalars().all()
     logger.debug("Listed %d tags for user_id=%d", len(tags), user_id)
@@ -29,11 +30,13 @@ def list_tags(user_id):
 @jwt_required()
 @validate_json
 @get_user_id
-def add_tag(data, user_id):
+def add_tag(data: dict[str, Any], user_id: int):
     schema = BasicSchema.model_validate(data)
     tag = get_or_create_by_name(Tag, schema.name, user_id)
     db.session.commit()
-    logger.info("Tag created/retrieved: id=%d name=%r user_id=%d", tag.id, tag.name, user_id)
+    logger.info(
+        "Tag created/retrieved: id=%d name=%r user_id=%d", tag.id, tag.name, user_id
+    )
     return jsonify(tag.to_dict()), 201
 
 
@@ -41,13 +44,15 @@ def add_tag(data, user_id):
 @jwt_required()
 @validate_json
 @get_user_id
-def delete_tags(data, user_id):
+def delete_tags(data: dict[str, Any], user_id: int):
     schema = IDSchema.model_validate(data)
     tags = get_entities(schema.ids, Tag, user_id)
     for tag in tags:
         db.session.delete(tag)
     db.session.commit()
-    logger.info("Tags deleted: ids=%s user_id=%d count=%d", schema.ids, user_id, len(tags))
+    logger.info(
+        "Tags deleted: ids=%s user_id=%d count=%d", schema.ids, user_id, len(tags)
+    )
     return (
         jsonify({"deleted": [tag.to_dict() for tag in tags], "count": len(tags)}),
         200,

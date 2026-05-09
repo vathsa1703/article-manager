@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from flask import Blueprint, jsonify
 from flask_jwt_extended import (
@@ -24,7 +25,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @auth_bp.route("/register", methods=["POST"])
 @validate_json
-def register(data):
+def register(data: dict[str, Any]):
     schema = UserSchema.model_validate(data)
     username = schema.name
     password = schema.password
@@ -52,7 +53,7 @@ def register(data):
 
 @auth_bp.route("/login", methods=["POST"])
 @validate_json
-def login(data):
+def login(data: dict[str, Any]):
     schema = UserSchema.model_validate(data)
     username = schema.name
     password = schema.password
@@ -77,7 +78,7 @@ def login(data):
 @auth_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 @get_user_id
-def refresh(user_id):
+def refresh(user_id: int):
     logger.info("Token refreshed: user_id=%d", user_id)
     access_token = create_access_token(identity=str(user_id))
     response = jsonify({"msg": "Refresh successful"})

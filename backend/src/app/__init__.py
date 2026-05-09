@@ -17,6 +17,7 @@ from app.blueprints.authors import authors_bp
 from app.blueprints.health import health_bp
 from app.blueprints.tags import tags_bp
 from app.database import db
+from app.exceptions import EntityDuplicatedError
 from app.types import EntitiesNotFoundError
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -61,7 +62,7 @@ def create_app(test_config=None):
             resources={r"/*": {"origins": frontend_origins}},
             supports_credentials=True,
         )
-        
+
     app.config.setdefault("SECRET_KEY", os.environ.get("SECRET_KEY", ""))
     app.config.setdefault("JWT_SECRET_KEY", os.environ.get("JWT_SECRET_KEY", ""))
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=15)
@@ -104,19 +105,42 @@ def create_app(test_config=None):
     def favicon():
         return "", 204
 
+    @app.errorhandler(EntityDuplicatedError)
+    def handle_duplicated_error(error: EntityDuplicatedError):
+        logger.warning(
+            f"{error.action} failed — duplicate {error.entity_name} for user_id={error.user_id}: {error.entity_id}"
+        )
+        return jsonify({"error": str(error)}), 409
+
     @app.errorhandler(ValidationError)
     def handle_validation_error(error):
-        logger.warning("Validation error on %s %s: %s", request.method, request.path, error.errors())
+        logger.warning(
+            "Validation error on %s %s: %s",
+            request.method,
+            request.path,
+            error.errors(),
+        )
         return jsonify({"error": error.errors()}), 422
 
     @app.errorhandler(EntitiesNotFoundError)
     def handle_entities_not_found_error(error):
-        logger.warning("Entities not found on %s %s: missing_ids=%s", request.method, request.path, error.missing_ids)
+        logger.warning(
+            "Entities not found on %s %s: missing_ids=%s",
+            request.method,
+            request.path,
+            error.missing_ids,
+        )
         return jsonify({"error": str(error), "missing_ids": error.missing_ids}), 404
 
     @app.errorhandler(HTTPException)
     def handle_http_exception(error):
-        logger.warning("HTTP %d on %s %s: %s", error.code, request.method, request.path, error.description)
+        logger.warning(
+            "HTTP %d on %s %s: %s",
+            error.code,
+            request.method,
+            request.path,
+            error.description,
+        )
         return jsonify({"error": error.description}), error.code
 
     app.register_blueprint(health_bp)

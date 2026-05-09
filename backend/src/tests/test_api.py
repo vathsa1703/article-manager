@@ -179,3 +179,10 @@ def test_per_user_isolation(client, mock_article):
     assert res3.status_code == 200
     headers3 = get_csrf_header(res3, "access")
     assert len(client.get("/articles", headers=headers3).get_json()) == 1
+
+
+def test_duplicated_url(auth_client, article, mock_article_2):
+    mock_article_2["url"] = article["url"]
+    res = auth_client.post("/articles", json=mock_article_2)
+    assert res.status_code == 409
+    assert "duplicate" in res.get_json()["error"]
