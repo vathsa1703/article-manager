@@ -54,7 +54,7 @@ function AuthForm({ isOpen, mode, onClose }: Readonly<AuthFormProps>) {
 
   return (
     <PopupWrapper popup={isOpen} setPopup={(value) => !value && onClose()} status="neutral">
-      <form className="article-form flex w-80 flex-col space-y-6" onSubmit={handleSubmit}>
+      <form className="article-form mx-auto flex w-80 max-w-full flex-col space-y-6" onSubmit={handleSubmit}>
         <h1 className="text-center text-3xl font-bold dark:text-white">{title}</h1>
         <div className="flex flex-col space-y-3 text-slate-800 dark:text-slate-100">
           <div>
