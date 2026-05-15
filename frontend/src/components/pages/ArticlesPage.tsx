@@ -53,9 +53,13 @@ function ArticlesPage() {
       field: 'date_modification',
       renderCell: (params) => {
         const date = new Date(params.row.date_modification);
-        return date.toLocaleDateString('en-US');
+        return date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
       },
-      renderHeader: () => <strong className="fs-5">{'Time'}</strong>,
+      renderHeader: () => <strong className="fs-5">{'Created'}</strong>,
     },
     {
       field: 'consulted',
