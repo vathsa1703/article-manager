@@ -9,10 +9,9 @@ on:
 jobs:
   backup:
     runs-on: ubuntu-latest
+    env:
+      PG_VERSION: "17"
     steps:
-      - name: Install PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-
       - name: Dump Neon database
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
@@ -20,7 +19,8 @@ jobs:
           set -euo pipefail
           URL="${DATABASE_URL}"
           URL="${URL/postgresql+psycopg:\/\//postgresql:\/\/}"
-          pg_dump "$URL" --inserts --no-owner --no-acl | gzip > backup.sql.gz
+          docker run --rm postgres:${{ env.PG_VERSION }} \
+            pg_dump "$URL" --inserts --no-owner --no-acl | gzip > backup.sql.gz
           ls -lh backup.sql.gz
 
       - name: Upload backup artifact
