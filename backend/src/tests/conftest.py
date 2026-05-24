@@ -43,8 +43,9 @@ def app():
             "SECRET_KEY": "test-key",
         }
     )
-    yield app
     with app.app_context():
+        _db.create_all()
+        yield app
         _db.drop_all()
 
 
