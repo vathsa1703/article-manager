@@ -31,6 +31,7 @@ dist/
 # IDE
 .idea/
 .vscode/
+private/
 
 # TEST (SonarQube)
 .scannerwork
