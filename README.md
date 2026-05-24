@@ -77,7 +77,7 @@ For the record, here's the justification for some technical decisions I made dur
 - Moved from storing tokens in localStorage (vulnerable to XSS attacks) to storing them in cookies with a CSRF protection.
 - Deployed frontend on Vercel and backend on Render as the free tier was covering my needs and the setup was easy.
 - Decided to handle backend cold starts with a simple /health endpoint on the server and add user feedback to avoid confusion.
-
+- Added Alembic to handle schema migrations.
 
 ## Prerequisites
 

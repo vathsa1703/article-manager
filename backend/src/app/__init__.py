@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 from pydantic import ValidationError
 from werkzeug.exceptions import HTTPException
 
@@ -79,10 +80,8 @@ def create_app(test_config=None):
     app.config["JWT_REFRESH_CSRF_COOKIE_PATH"] = "/"
 
     db.init_app(app)
+    Migrate(app, db)
     JWTManager(app)
-
-    with app.app_context():
-        db.create_all()
 
     @app.before_request
     def _log_request_start():
