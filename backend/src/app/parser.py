@@ -3,11 +3,11 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 
-def get_document(url: str) -> str:
+def get_document(url: str) -> BeautifulSoup:
     headers = {"User-Agent": "ArticleManager/1.0"}
     res = requests.get(url, headers=headers, timeout=10)
     res.raise_for_status()
-    return res.text
+    return BeautifulSoup(res.text, "html.parser")
 
 
 def extract_text(tag: Tag | None, location: str) -> str | None:
@@ -27,9 +27,7 @@ def clean_text(text: str | None) -> str:
     return text.strip()
 
 
-def get_title(html_doc: str) -> str:
-    soup = BeautifulSoup(html_doc, "html.parser")
-
+def get_title(html_doc: BeautifulSoup) -> str:
     candidates = [
         {"name": "meta", "kwargs": {"property": "og:title"}, "location": "content"},
         {
@@ -42,7 +40,34 @@ def get_title(html_doc: str) -> str:
     ]
 
     for candidate in candidates:
-        tag = soup.find(candidate["name"], **candidate.get("kwargs", {}))
+        tag = html_doc.find(candidate["name"], **candidate.get("kwargs", {}))
+        text = extract_text(tag, candidate["location"])
+        title = clean_text(text)
+        if title:
+            return title
+
+    return ""
+
+
+def get_author(html_doc: BeautifulSoup) -> str:
+    candidates = [
+        {
+            "name": "meta",
+            "kwargs": {"attrs": {"name": "author"}},
+            "location": "content",
+        },
+        {
+            "name": "meta",
+            "kwargs": {"property": "article:author"},
+            "location": "content",
+        },
+        {"name": True, "kwargs": {"attrs": {"rel": "author"}}, "location": "text"},
+        {"name": True, "kwargs": {"attrs": {"class": "author"}}, "location": "text"},
+        {"name": True, "kwargs": {"attrs": {"class": "byline"}}, "location": "text"},
+    ]
+
+    for candidate in candidates:
+        tag = html_doc.find(candidate["name"], **candidate.get("kwargs", {}))
         text = extract_text(tag, candidate["location"])
         title = clean_text(text)
         if title:
