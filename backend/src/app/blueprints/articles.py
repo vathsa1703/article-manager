@@ -9,7 +9,7 @@ from app.database import db
 from app.decorators import get_user_id, validate_json
 from app.exceptions import EntityDuplicatedError
 from app.models import Article, Author
-from app.parser import get_author, get_document, get_title
+from app.parser import get_author, get_date, get_document, get_title
 from app.schemas import ArticleSchema, BasicSchema, IDSchema
 from app.services import (
     associate_tags,
@@ -144,4 +144,5 @@ def parse_article(data: dict[str, Any]):
     doc = get_document(url)
     title = get_title(doc)
     author = get_author(doc)
-    return jsonify({"title": title, "author": author}), 200
+    date = get_date(doc)
+    return jsonify({"title": title, "author": author, "date": date}), 200
