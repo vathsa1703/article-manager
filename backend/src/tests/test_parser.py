@@ -1,20 +1,24 @@
+from pathlib import Path
+
 import pytest
+
+FIXTURES_DIR = Path(__file__).parent / "fixtures" / "parser"
 
 
 @pytest.mark.parametrize(
-    "url, title",
+    "fixture_name, title",
     [
-        ("https://slatestarcodex.com/2017/10/02/different-worlds/", "Different Worlds"),
-        (
-            "https://sashachapin.substack.com/p/what-the-humans-like-is-responsiveness",
-            "What the humans like is responsiveness",
-        ),
-        ("https://waitbutwhy.com/2016/03/cryonics.html", "Why Cryonics Makes Sense"),
-        ("https://paulgraham.com/lesson.html", "The Lesson to Unlearn"),
+        ("og_title.html", "Different Worlds"),
+        ("twitter_title.html", "What the humans like is responsiveness"),
+        ("title_tag.html", "Why Cryonics Makes Sense"),
+        ("h1_fallback.html", "The Lesson to Unlearn"),
     ],
 )
-def test_parse_title(auth_client, url, title):
-    res = auth_client.post("/articles/metadata", json={"name": url})
+def test_parse_title(auth_client, monkeypatch, fixture_name, title):
+    html = (FIXTURES_DIR / fixture_name).read_text(encoding="utf-8")
+    monkeypatch.setattr("app.blueprints.articles.get_document", lambda _url: html)
+
+    res = auth_client.post("/articles/metadata", json={"name": "https://example.com"})
     assert res.status_code == 200
     json = res.get_json()
     assert json["title"] == title
