@@ -5,7 +5,7 @@ import CreatableSelect from 'react-select/creatable';
 import type { SingleValue } from 'react-select';
 import TagsForm from './TagsForm';
 import { buttonSize, buttonStyle } from '../../constants/constants';
-import { FormProps } from '../../constants/types';
+import { ArticleFormProps } from '../../constants/types';
 import { ArticleSchema } from '../../constants/schema';
 import { useAuthors } from '../../hooks/queries';
 import PopupWrapper from '../features/PopupWrapper';
@@ -13,7 +13,7 @@ import RemoveButton from '../features/RemoveButton';
 
 type AuthorOption = { value: string; label: string };
 
-function ArticleForm({ isOpen, toggle, onSave, title, activeItem, showDeleteButton }: Readonly<FormProps>) {
+function ArticleForm({ isOpen, toggle, onSave, title, activeItem, showDeleteButton }: Readonly<ArticleFormProps>) {
   const currentYear = new Date().getFullYear();
   const [item, setItem] = useState(activeItem);
   const [errors, setErrors] = useState<Record<string, string>>({});

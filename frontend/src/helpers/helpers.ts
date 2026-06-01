@@ -14,3 +14,11 @@ export function getCookie(name: string): string | undefined {
 export function normalizeEntityNames(entities: Array<string | Entity>): string[] {
   return entities.map((entity) => (typeof entity === 'string' ? entity : entity.name));
 }
+
+export function parseYear(date: string): number {
+  if (!date) {
+    return new Date().getFullYear();
+  }
+
+  return new Date(date).getFullYear();
+}

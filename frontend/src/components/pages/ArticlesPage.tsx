@@ -1,12 +1,10 @@
 import { GridColDef } from '@mui/x-data-grid';
 import { Heart } from 'react-feather';
-import { Article } from '../../constants/types';
 import { useArticles } from '../../hooks/queries';
 import AddButton from '../features/AddButton';
 import StatusIcon from '../features/StatusIcon';
 import DataTable from '../layout/DataTable';
 import EditButton from '../features/EditButton';
-import ArticleForm from '../forms/ArticleForm';
 import PageHeader from '../layout/PageHeader';
 
 function ArticlesPage() {
@@ -15,20 +13,6 @@ function ArticlesPage() {
   const likedCount = articles.filter((article) => article.liked).length;
 
   const TITLE_ADD_FORM: string = 'Add article';
-  const newArticle: Article = {
-    id: 0,
-    title: '',
-    author: '',
-    url: '',
-    year: new Date().getFullYear(),
-    summary: '',
-    consulted: false,
-    read_later: false,
-    liked: false,
-    tags: [],
-    date_creation: '',
-    date_modification: '',
-  };
   const COLUMNS: GridColDef[] = [
     {
       field: 'title',
@@ -113,7 +97,7 @@ function ArticlesPage() {
       </PageHeader>
 
       <div className="flex justify-end">
-        <AddButton FormComponent={ArticleForm} title={TITLE_ADD_FORM} activeItem={newArticle} />
+        <AddButton title={TITLE_ADD_FORM} />
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">

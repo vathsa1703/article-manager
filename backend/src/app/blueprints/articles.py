@@ -144,5 +144,10 @@ def parse_article(data: dict[str, Any]):
     parser = MetadataParser(url)
     parser.parse()
     return jsonify(
-        {"title": parser.title, "author": parser.author, "date": parser.date}
+        {
+            "title": parser.title,
+            "author": parser.author,
+            "date": parser.date,
+            "url": url,
+        }
     ), 200

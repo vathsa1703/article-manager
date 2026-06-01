@@ -13,6 +13,13 @@ export interface Article {
   date_modification: string;
 }
 
+export interface ParsedMetadata {
+  title: string;
+  author: string;
+  date: string;
+  url: string;
+}
+
 export interface Credentials {
   name: string;
   password: string;
@@ -32,11 +39,18 @@ export type AuthorStat = {
   count: number;
 };
 
-export interface FormProps {
+export interface BaseFormProps {
   isOpen: boolean;
   toggle: () => void;
-  onSave: (item: Article) => void;
   title: string;
-  activeItem: Article;
   showDeleteButton?: boolean;
+}
+
+export interface ArticleFormProps extends BaseFormProps {
+  onSave: (item: Article) => void;
+  activeItem: Article;
+}
+
+export interface UrlFormProps extends BaseFormProps {
+  onSave: (url: string) => void;
 }
