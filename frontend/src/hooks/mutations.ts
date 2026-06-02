@@ -93,3 +93,15 @@ export const useLogout = () => {
     },
   });
 };
+
+export const useParsing = () => {
+  return useMutation({
+    mutationFn: articlesApi.parse,
+    onSuccess: () => {
+      toast.success('Article successfully parsed!');
+    },
+    onError: (err: unknown) => {
+      toast.error(extractErrorMessage(err));
+    },
+  });
+};

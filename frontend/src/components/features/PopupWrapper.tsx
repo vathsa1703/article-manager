@@ -11,6 +11,7 @@ interface PropsType {
 }
 
 function PopupWrapper({ popup, setPopup, status, children }: Readonly<PropsType>) {
+  const panelMaxHeight = 'min(90dvh, calc(100dvh - 2rem))';
   let statusClasses;
 
   switch (status) {
@@ -44,17 +45,15 @@ function PopupWrapper({ popup, setPopup, status, children }: Readonly<PropsType>
           left: '50%',
           transform: 'translate(-50%, -50%)',
           width: 'min(calc(100vw - 2rem), 28rem)',
-          maxHeight: 'min(90dvh, calc(100dvh - 2rem))',
         }}
       >
-        <Box
-          sx={{
-            outline: 'none',
-            maxHeight: 'inherit',
-            overflow: 'auto',
-          }}
-        >
-          <div id="alert-additional-content-3" className={`${statusClasses} rounded-lg select-none p-4`} role="alert">
+        <Box sx={{ outline: 'none' }}>
+          <div
+            id="alert-additional-content-3"
+            className={`${statusClasses} overflow-y-auto rounded-lg select-none p-4`}
+            style={{ maxHeight: panelMaxHeight }}
+            role="alert"
+          >
             {children}
           </div>
         </Box>

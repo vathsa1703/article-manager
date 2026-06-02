@@ -9,7 +9,8 @@ from app.database import db
 from app.decorators import get_user_id, validate_json
 from app.exceptions import EntityDuplicatedError
 from app.models import Article, Author
-from app.schemas import ArticleSchema, IDSchema
+from app.parser import MetadataParser
+from app.schemas import ArticleSchema, BasicSchema, IDSchema
 from app.services import (
     associate_tags,
     check_url_uniqueness,
@@ -132,3 +133,21 @@ def delete_articles(data: dict[str, Any], user_id: int):
         ),
         200,
     )
+
+
+@articles_bp.route("/metadata", methods=["POST"])
+@validate_json
+@jwt_required()
+def parse_article(data: dict[str, Any]):
+    schema = BasicSchema.model_validate(data)
+    url = schema.name
+    parser = MetadataParser(url)
+    parser.parse()
+    return jsonify(
+        {
+            "title": parser.title,
+            "author": parser.author,
+            "date": parser.date,
+            "url": url,
+        }
+    ), 200

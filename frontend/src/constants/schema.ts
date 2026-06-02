@@ -37,6 +37,13 @@ export const ArticleSchema = z.object({
 
 export const ArticlesSchema = z.array(ArticleSchema);
 
+export const ParsedMetadataSchema = z.object({
+  title: z.string(),
+  author: z.string(),
+  date: z.string(),
+  url: z.string(),
+});
+
 const makeDeletedSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
   z.object({
     deleted: z.array(itemSchema),

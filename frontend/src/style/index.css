@@ -234,10 +234,20 @@ body {
 
 .dark .article-form input.form-control:-webkit-autofill,
 .dark .article-form input.form-control:-webkit-autofill:hover,
-.dark .article-form input.form-control:-webkit-autofill:focus {
+.dark .article-form input.form-control:-webkit-autofill:focus,
+.dark .article-form input.form-control:autofill {
   -webkit-text-fill-color: #e2e8f0;
   -webkit-box-shadow: 0 0 0 1000px #1e293b inset;
+  box-shadow: 0 0 0 1000px #1e293b inset;
   transition: background-color 9999s ease-out 0s;
+}
+
+.dark .article-form input.form-control[type='url'],
+.dark .article-form input.form-control[type='url']:focus {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+  color-scheme: dark;
 }
 
 /* Light mode */

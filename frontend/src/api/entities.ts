@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API_URLS } from '../constants/constants';
-import type { Article, AuthorStat, Credentials, Message } from '../constants/types';
+import type { Article, AuthorStat, Credentials, Message, ParsedMetadata } from '../constants/types';
 import {
   MessageSchema,
   DeletedArticlesSchema,
@@ -10,6 +10,7 @@ import {
   AuthorStatSchema,
   ArticleSchema,
   ArticlesSchema,
+  ParsedMetadataSchema,
 } from '../constants/schema';
 import { getCookie, normalizeEntityNames } from '../helpers/helpers';
 
@@ -109,6 +110,13 @@ export const articlesApi = {
     });
     const response = DeletedArticlesSchema.parse(data);
     return response.count;
+  },
+  parse: async (url: string): Promise<ParsedMetadata> => {
+    const { data } = await apiClient.post(API_URLS.PARSE, {
+      name: url,
+    });
+    const response = ParsedMetadataSchema.parse(data);
+    return response;
   },
 };
 
