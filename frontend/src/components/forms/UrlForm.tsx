@@ -33,7 +33,7 @@ function UrlForm({ isOpen, toggle, onSave, title }: Readonly<UrlFormProps>) {
 
   return (
     <PopupWrapper popup={isOpen} setPopup={toggle} status="neutral">
-      <div className="flex w-100 flex-col space-y-8">
+      <div className="article-form flex w-100 flex-col space-y-8">
         <h1 className="text-center text-3xl font-bold dark:text-white">{title}</h1>
         <form>
           <div>

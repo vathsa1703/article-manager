@@ -131,6 +131,7 @@ function ArticleForm({ isOpen, toggle, onSave, title, activeItem, showDeleteButt
                 value={item.url}
                 onChange={handleFieldChange}
                 className={inputClassName}
+                autoComplete="off"
                 invalid={errors.url !== undefined && errors.url !== ''}
               />
               {errors.url && <div className="text-sm text-red-500">{errors.url}</div>}
