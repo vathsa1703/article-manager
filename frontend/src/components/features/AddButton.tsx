@@ -4,7 +4,6 @@ import { Article } from '../../constants/types';
 import { useCreateArticle, useParsing } from '../../hooks/mutations';
 import ArticleForm from '../forms/ArticleForm';
 import UrlForm from '../forms/UrlForm';
-import { data } from 'react-router-dom';
 import { parseYear } from '../../helpers/helpers';
 
 interface PropsType {
