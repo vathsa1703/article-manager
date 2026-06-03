@@ -2,6 +2,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+import requests
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures" / "parser"
 
@@ -31,3 +32,19 @@ def test_parse_metadata(auth_client, monkeypatch, fixture_name, title, author, d
     assert json["title"] == title
     assert json["author"] == author
     assert json["date"] == date
+
+
+def test_parse_metadata_returns_client_error_for_invalid_url(auth_client, monkeypatch):
+    def raise_invalid_url(*args, **kwargs):
+        raise requests.exceptions.InvalidURL("Invalid URL")
+
+    monkeypatch.setattr("app.parser.requests.get", raise_invalid_url)
+
+    res = auth_client.post("/articles/metadata", json={"name": "not-a-url"})
+
+    assert res.status_code == 400
+    assert (
+        res.get_json()["error"]
+        == "Unable to fetch metadata from the provided URL. "
+        "Please check that the URL is valid and reachable."
+    )
