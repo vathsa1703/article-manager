@@ -1,9 +1,11 @@
 import logging
 from typing import Any
 
+import requests
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
 from sqlalchemy import select
+from werkzeug.exceptions import BadRequest
 
 from app.database import db
 from app.decorators import get_user_id, validate_json
@@ -142,7 +144,13 @@ def parse_article(data: dict[str, Any]):
     schema = BasicSchema.model_validate(data)
     url = schema.name
     parser = MetadataParser(url)
-    parser.parse()
+    try:
+        parser.parse()
+    except requests.exceptions.RequestException as error:
+        raise BadRequest(
+            "Unable to fetch metadata from the provided URL. "
+            "Please check that the URL is valid and reachable."
+        ) from error
     return jsonify(
         {
             "title": parser.title,
