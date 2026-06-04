@@ -44,7 +44,6 @@ def test_parse_metadata_returns_client_error_for_invalid_url(auth_client, monkey
 
     assert res.status_code == 400
     assert (
-        res.get_json()["error"]
-        == "Unable to fetch metadata from the provided URL. "
+        res.get_json()["error"] == "Unable to fetch metadata from the provided URL. "
         "Please check that the URL is valid and reachable."
     )

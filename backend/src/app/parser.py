@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 import requests
@@ -14,12 +15,14 @@ class MetadataParser:
         self.title = ""
         self.author = ""
         self.date = ""
+        self.text = ""
 
     def parse(self):
         self.get_document(self.url)
         self.get_title()
         self.get_author()
         self.get_date()
+        self.get_text()
 
     @staticmethod
     def get_attribute(
@@ -142,3 +145,63 @@ class MetadataParser:
             {"name": "time", "location": "text"},
         ]
         self.date = self.get_attribute(candidates, self.doc)
+
+    def get_text(self) -> None:
+        candidates = [
+            {
+                "name": "article",
+                "location": "text",
+            },
+            {
+                "name": "main",
+                "location": "text",
+            },
+            {
+                "name": True,
+                "kwargs": {"attrs": {"class": "article-content"}},
+                "location": "text",
+            },
+            {
+                "name": True,
+                "kwargs": {
+                    "attrs": {"class": re.compile(r"(?:^|-)postcontent$|post-content")}
+                },
+                "location": "text",
+            },
+            {
+                "name": True,
+                "kwargs": {"attrs": {"class": "entry-content"}},
+                "location": "text",
+            },
+            {
+                "name": True,
+                "kwargs": {"attrs": {"class": "content"}},
+                "location": "text",
+            },
+            {
+                "name": True,
+                "kwargs": {"attrs": {"class": "article-body"}},
+                "location": "text",
+            },
+            {
+                "name": True,
+                "kwargs": {"attrs": {"class": "post-body"}},
+                "location": "text",
+            },
+            {
+                "name": True,
+                "kwargs": {"attrs": {"id": "article"}},
+                "location": "text",
+            },
+            {
+                "name": True,
+                "kwargs": {"attrs": {"id": "content"}},
+                "location": "text",
+            },
+            {
+                "name": True,
+                "kwargs": {"attrs": {"id": "main-content"}},
+                "location": "text",
+            },
+        ]
+        self.text = self.get_attribute(candidates, self.doc)

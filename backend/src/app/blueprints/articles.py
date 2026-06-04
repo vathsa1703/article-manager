@@ -157,5 +157,6 @@ def parse_article(data: dict[str, Any]):
             "author": parser.author,
             "date": parser.date,
             "url": url,
+            "text": parser.text,
         }
     ), 200
