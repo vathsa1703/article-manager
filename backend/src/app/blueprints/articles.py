@@ -46,6 +46,9 @@ def add_article(data: dict[str, Any], user_id: int):
     if not check_url_uniqueness(schema.url, user_id):
         raise EntityDuplicatedError("Add article", user_id, "URL", schema.url)
 
+    parser = MetadataParser(schema.url)
+    content = parser.parse_content()
+
     tags = associate_tags(schema.tags, user_id)
     author = get_or_create_by_name(Author, schema.author, user_id)
 
@@ -60,6 +63,7 @@ def add_article(data: dict[str, Any], user_id: int):
         liked=schema.liked,
         author_id=author.id,
         tags=tags,
+        content=content,
     )
     db.session.add(article)
     db.session.commit()
@@ -143,8 +147,8 @@ def delete_articles(data: dict[str, Any], user_id: int):
 def parse_article(data: dict[str, Any]):
     schema = BasicSchema.model_validate(data)
     url = schema.name
-    parser = MetadataParser(url)
     try:
+        parser = MetadataParser(url)
         parser.parse()
     except requests.exceptions.RequestException as error:
         raise BadRequest(
@@ -157,6 +161,5 @@ def parse_article(data: dict[str, Any]):
             "author": parser.author,
             "date": parser.date,
             "url": url,
-            "content": parser.content,
         }
     ), 200

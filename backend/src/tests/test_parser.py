@@ -39,7 +39,6 @@ def test_parse_metadata_returns_client_error_for_invalid_url(auth_client, monkey
         raise requests.exceptions.InvalidURL("Invalid URL")
 
     monkeypatch.setattr("app.parser.requests.get", raise_invalid_url)
-
     res = auth_client.post("/articles/metadata", json={"name": "not-a-url"})
 
     assert res.status_code == 400

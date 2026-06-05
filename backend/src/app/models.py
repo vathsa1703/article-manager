@@ -123,4 +123,5 @@ class Article(db.Model):
             "tags": [t.name for t in self.tags],
             "date_creation": self.date_creation.isoformat(),
             "date_modification": self.date_modification.isoformat(),
+            "content": self.content,
         }

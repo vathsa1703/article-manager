@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 from werkzeug import Response
 
@@ -320,3 +322,21 @@ INVALID_ARTICLE_CASES = [
         [["author"]],
     ),
 ]
+
+DEFAULT_PARSER_HTML = """
+<html>
+  <head><title>Test Article</title></head>
+  <body><article><p>Test content</p></article></body>
+</html>
+"""
+
+
+@pytest.fixture(autouse=True)
+def mock_requests_get(monkeypatch):
+    def fake_get(url, *args, **kwargs):
+        return SimpleNamespace(
+            text=DEFAULT_PARSER_HTML,
+            raise_for_status=lambda: None,
+        )
+
+    monkeypatch.setattr("app.parser.requests.get", fake_get)

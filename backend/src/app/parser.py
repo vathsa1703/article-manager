@@ -14,18 +14,16 @@ class MetadataParser:
 
     def __init__(self, url: str):
         self.url = url
-        self.doc: BeautifulSoup | None = None
+        self.doc: BeautifulSoup | None = self.parse_document(self.url)
         self.title = ""
         self.author = ""
         self.date = ""
         self.content = {}
 
     def parse(self):
-        self.get_document(self.url)
         self.get_title()
         self.get_author()
         self.get_date()
-        self.get_text()
 
     @staticmethod
     def get_attribute(
@@ -89,11 +87,11 @@ class MetadataParser:
             return ""
         return text.strip()
 
-    def get_document(self, url: str) -> None:
+    def parse_document(self, url: str) -> None:
         headers = {"User-Agent": "ArticleManager/1.0"}
         res = requests.get(url, headers=headers, timeout=10)
         res.raise_for_status()
-        self.doc = BeautifulSoup(res.text, "html.parser")
+        return BeautifulSoup(res.text, "html.parser")
 
     def get_title(self) -> None:
         candidates = [
@@ -175,7 +173,7 @@ class MetadataParser:
         ]
         self.date = self.get_attribute(candidates, self.doc)
 
-    def get_text(self) -> None:
+    def parse_content(self) -> None:
         candidates = [
             {
                 "name": "article",
@@ -233,4 +231,4 @@ class MetadataParser:
                 "location": "structured_text",
             },
         ]
-        self.content = self.get_attribute(candidates, self.doc)
+        return self.get_attribute(candidates, self.doc)
