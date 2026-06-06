@@ -110,6 +110,11 @@ export const articlesApi = {
     const sorted_res = response.sort((a, b) => b.date_modification.localeCompare(a.date_modification));
     return sorted_res;
   },
+  get: async (id: number): Promise<Article> => {
+    const { data } = await apiClient.get(`${API_URLS.ARTICLES}/${id}`);
+    const response = parseWithError(ArticleSchema, data);
+    return response;
+  },
   create: async (article: Article): Promise<Article> => {
     const { data } = await apiClient.post(API_URLS.ARTICLES, article);
     const response = parseWithError(ArticleSchema, data);

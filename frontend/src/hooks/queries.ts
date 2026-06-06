@@ -11,9 +11,9 @@ export function useArticles() {
 
 export function useArticle(id: number) {
   return useQuery({
-    queryKey: queryKeys.articles.list(),
-    queryFn: articlesApi.list,
-    select: (articles) => articles.find((article) => article.id === id),
+    queryKey: queryKeys.articles.detail(id),
+    queryFn: () => articlesApi.get(id),
+    enabled: Number.isInteger(id) && id > 0,
   });
 }
 
