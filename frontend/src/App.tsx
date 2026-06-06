@@ -4,6 +4,7 @@ import NavBar from './components/layout/NavBar';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import GridPage from './components/pages/GridPage';
 import ArticlesPage from './components/pages/ArticlesPage';
+import ReadingPage from './components/pages/ReadingPage';
 import StatsPage from './components/pages/StatsPage';
 import HomePage from './components/pages/HomePage';
 import { Toaster } from 'sonner';
@@ -25,6 +26,7 @@ function App() {
           <Routes>
             <Route element={<ProtectedRoute />}>
               <Route path="articles" element={<ArticlesPage />} />
+              <Route path="articles/:id" element={<ReadingPage />} />
               <Route
                 path="likes"
                 element={

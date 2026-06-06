@@ -2,13 +2,14 @@ import { GridColDef } from '@mui/x-data-grid';
 import { Heart } from 'react-feather';
 import { useArticles } from '../../hooks/queries';
 import AddButton from '../features/AddButton';
+import { ArticleLink } from '../features/ArticleLink';
 import StatusIcon from '../features/StatusIcon';
 import DataTable from '../layout/DataTable';
 import EditButton from '../features/EditButton';
 import PageHeader from '../layout/PageHeader';
 
-function ArticlesPage() {
-  const { data: articles = [] } = useArticles();
+export default function ArticlesPage() {
+  const { data: articles = [], error } = useArticles();
   const consultedCount = articles.filter((article) => article.consulted).length;
   const likedCount = articles.filter((article) => article.liked).length;
 
@@ -19,9 +20,13 @@ function ArticlesPage() {
       width: 300,
       renderHeader: () => <strong className="fs-5">{'Title'}</strong>,
       renderCell: (params) => (
-        <a href={params.row.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: params.row.consulted ? 'line-through' : 'none' }}>
+        <ArticleLink
+          id={params.row.id}
+          style={{ textDecoration: params.row.consulted ? 'line-through' : 'none' }}
+          className="text-inherit hover:text-indigo-600 dark:hover:text-indigo-300"
+        >
           {params.row.title}
-        </a>
+        </ArticleLink>
       ),
     },
     {
@@ -101,11 +106,8 @@ function ArticlesPage() {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <DataTable data={articles} columns={COLUMNS} />
+        <DataTable data={articles} columns={COLUMNS} error={error} />
       </div>
     </div>
   );
 }
-
-// Exportation
-export default ArticlesPage;

@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy import JSON, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import db
@@ -94,6 +94,7 @@ class Article(db.Model):
     author: Mapped["Author"] = relationship(back_populates="articles")
     url: Mapped[str] = mapped_column(nullable=False)
     year: Mapped[int] = mapped_column(nullable=False)
+    content: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
     summary: Mapped[str | None] = mapped_column(nullable=True)
     consulted: Mapped[bool] = mapped_column(default=False, nullable=False)
     read_later: Mapped[bool] = mapped_column(default=False, nullable=False)
@@ -122,4 +123,5 @@ class Article(db.Model):
             "tags": [t.name for t in self.tags],
             "date_creation": self.date_creation.isoformat(),
             "date_modification": self.date_modification.isoformat(),
+            "content": self.content,
         }

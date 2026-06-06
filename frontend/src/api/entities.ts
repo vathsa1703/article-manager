@@ -13,6 +13,8 @@ import {
   ParsedMetadataSchema,
 } from '../constants/schema';
 import { getCookie, normalizeEntityNames } from '../helpers/helpers';
+import { ZodType, ZodError } from 'zod';
+import type { infer as ZodInfer } from 'zod';
 
 const apiClient = axios.create();
 
@@ -44,7 +46,7 @@ apiClient.interceptors.response.use(
 export const healthApi = {
   status: async (): Promise<Message> => {
     const { data } = await axios.get(API_URLS.HEALTH);
-    const result = MessageSchema.parse(data);
+    const result = parseWithError(MessageSchema, data);
     return result;
   },
 };
@@ -52,12 +54,12 @@ export const healthApi = {
 export const authApi = {
   register: async (credentials: Credentials): Promise<Message> => {
     const { data } = await apiClient.post(API_URLS.REGISTER, credentials);
-    const result = MessageSchema.parse(data);
+    const result = parseWithError(MessageSchema, data);
     return result;
   },
   login: async (credentials: Credentials): Promise<Message> => {
     const { data } = await apiClient.post(API_URLS.LOGIN, credentials);
-    const result = MessageSchema.parse(data);
+    const result = parseWithError(MessageSchema, data);
     return result;
   },
   refresh: async (): Promise<Message> => {
@@ -78,44 +80,63 @@ export const authApi = {
         },
       },
     );
-    const result = MessageSchema.parse(data);
+    const result = parseWithError(MessageSchema, data);
     return result;
   },
   logout: async (): Promise<Message> => {
     const { data } = await apiClient.post(API_URLS.LOGOUT);
-    const result = MessageSchema.parse(data);
+    const result = parseWithError(MessageSchema, data);
     return result;
   },
+};
+
+const parseWithError = <TSchema extends ZodType>(schema: TSchema, data: unknown): ZodInfer<TSchema> => {
+  try {
+    const response = schema.parse(data);
+    return response;
+  } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      console.error(`Invalid API response`, error.issues);
+      throw new Error(`Invalid API response. Please try again later.`, { cause: error });
+    }
+    throw error;
+  }
 };
 
 export const articlesApi = {
   list: async (): Promise<Article[]> => {
     const { data } = await apiClient.get(API_URLS.ARTICLES);
-    const response = ArticlesSchema.parse(data);
+    const response = parseWithError(ArticlesSchema, data);
+    const sorted_res = response.sort((a, b) => b.date_modification.localeCompare(a.date_modification));
+    return sorted_res;
+  },
+  get: async (id: number): Promise<Article> => {
+    const { data } = await apiClient.get(`${API_URLS.ARTICLES}/${id}`);
+    const response = parseWithError(ArticleSchema, data);
     return response;
   },
   create: async (article: Article): Promise<Article> => {
     const { data } = await apiClient.post(API_URLS.ARTICLES, article);
-    const response = ArticleSchema.parse(data);
+    const response = parseWithError(ArticleSchema, data);
     return response;
   },
   update: async (article: Article): Promise<Article> => {
     const { data } = await apiClient.put(API_URLS.ARTICLES, article);
-    const response = ArticleSchema.parse(data);
+    const response = parseWithError(ArticleSchema, data);
     return response;
   },
   remove: async (ids: number[]): Promise<number> => {
     const { data } = await apiClient.delete(API_URLS.ARTICLES, {
       data: { ids },
     });
-    const response = DeletedArticlesSchema.parse(data);
+    const response = parseWithError(DeletedArticlesSchema, data);
     return response.count;
   },
   parse: async (url: string): Promise<ParsedMetadata> => {
     const { data } = await apiClient.post(API_URLS.PARSE, {
       name: url,
     });
-    const response = ParsedMetadataSchema.parse(data);
+    const response = parseWithError(ParsedMetadataSchema, data);
     return response;
   },
 };
@@ -123,29 +144,29 @@ export const articlesApi = {
 export const authorsApi = {
   list: async (): Promise<string[]> => {
     const { data } = await apiClient.get(API_URLS.AUTHORS);
-    const response = EntitiesSchema.parse(data);
+    const response = parseWithError(EntitiesSchema, data);
     return normalizeEntityNames(response);
   },
   list_top: async (): Promise<AuthorStat[]> => {
     const { data } = await apiClient.get(API_URLS.TOP_AUTHORS);
-    const response = AuthorStatSchema.parse(data);
+    const response = parseWithError(AuthorStatSchema, data);
     return response;
   },
   create: async (author: string): Promise<string> => {
     const { data } = await apiClient.post(API_URLS.AUTHORS, author);
-    const response = EntitySchema.parse(data);
+    const response = parseWithError(EntitySchema, data);
     return response.name;
   },
   update: async (author: string): Promise<string> => {
     const { data } = await apiClient.put(API_URLS.AUTHORS, author);
-    const response = EntitySchema.parse(data);
+    const response = parseWithError(EntitySchema, data);
     return response.name;
   },
   remove: async (ids: number[]): Promise<number> => {
     const { data } = await apiClient.delete(API_URLS.AUTHORS, {
       data: { ids },
     });
-    const response = DeletedEntitiesSchema.parse(data);
+    const response = parseWithError(DeletedEntitiesSchema, data);
     return response.count;
   },
 };
@@ -153,24 +174,24 @@ export const authorsApi = {
 export const tagsApi = {
   list: async (): Promise<string[]> => {
     const { data } = await apiClient.get(API_URLS.TAGS);
-    const response = EntitiesSchema.parse(data);
+    const response = parseWithError(EntitiesSchema, data);
     return normalizeEntityNames(response);
   },
   create: async (tag: string): Promise<string> => {
     const { data } = await apiClient.post(API_URLS.TAGS, tag);
-    const response = EntitySchema.parse(data);
+    const response = parseWithError(EntitySchema, data);
     return response.name;
   },
   update: async (tag: string): Promise<string> => {
     const { data } = await apiClient.put(API_URLS.TAGS, tag);
-    const response = EntitySchema.parse(data);
+    const response = parseWithError(EntitySchema, data);
     return response.name;
   },
   remove: async (ids: number[]): Promise<number> => {
     const { data } = await apiClient.delete(API_URLS.TAGS, {
       data: { ids },
     });
-    const response = DeletedEntitiesSchema.parse(data);
+    const response = parseWithError(DeletedEntitiesSchema, data);
     return response.count;
   },
 };

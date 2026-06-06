@@ -1,11 +1,12 @@
 import { Heart, XCircle } from 'react-feather';
 import { useState } from 'react';
+import { ArticleLink } from './ArticleLink';
 
 interface PropsType {
+  id: number;
   title: string;
   author: string;
   year: number;
-  url: string;
   isDarkMode: boolean;
   onUnlike?: () => void;
   isUnlikePending?: boolean;
@@ -13,11 +14,11 @@ interface PropsType {
   isClearReadLaterPending?: boolean;
 }
 
-function Card({
+export function Card({
+  id,
   title,
   author,
   year,
-  url,
   isDarkMode,
   onUnlike,
   isUnlikePending = false,
@@ -63,14 +64,9 @@ function Card({
       )}
       <div className="flex h-full flex-col justify-between gap-4">
         <h1 className="pr-10 text-base font-semibold leading-snug text-slate-800 dark:text-slate-100">
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-inherit no-underline transition-colors hover:text-indigo-600 dark:hover:text-indigo-300"
-          >
+          <ArticleLink id={id} className="text-inherit no-underline transition-colors hover:text-indigo-600 dark:hover:text-indigo-300">
             {title}
-          </a>
+          </ArticleLink>
         </h1>
         <div className="flex items-center justify-between rounded-xl bg-slate-200 px-3 py-2 dark:bg-slate-700/60">
           <span className="max-w-[70%] truncate text-sm font-medium text-slate-600 dark:text-slate-200">{author}</span>
@@ -82,5 +78,3 @@ function Card({
     </div>
   );
 }
-
-export default Card;

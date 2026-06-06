@@ -23,6 +23,7 @@ const newArticle: Article = {
   tags: [],
   date_creation: '',
   date_modification: '',
+  content: [],
 };
 
 function AddButton({ title }: Readonly<PropsType>) {

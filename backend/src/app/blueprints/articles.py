@@ -37,6 +37,18 @@ def list_articles(user_id: int):
     return jsonify([article.to_dict() for article in articles]), 200
 
 
+@articles_bp.route("/<int:article_id>")
+@jwt_required()
+@get_user_id
+def get_article(user_id: int, article_id: int):
+    stmt = select(Article).where(Article.user_id == user_id, Article.id == article_id)
+    article = db.session.execute(stmt).scalar_one()
+    logger.info(
+        "Article fetched: id=%d title=%r user_id=%d", article.id, article.title, user_id
+    )
+    return jsonify(article.to_dict()), 200
+
+
 @articles_bp.route("", methods=["POST"])
 @jwt_required()
 @validate_json
@@ -45,6 +57,9 @@ def add_article(data: dict[str, Any], user_id: int):
     schema = ArticleSchema.model_validate(data)
     if not check_url_uniqueness(schema.url, user_id):
         raise EntityDuplicatedError("Add article", user_id, "URL", schema.url)
+
+    parser = MetadataParser(schema.url)
+    content = parser.parse_content()
 
     tags = associate_tags(schema.tags, user_id)
     author = get_or_create_by_name(Author, schema.author, user_id)
@@ -60,6 +75,7 @@ def add_article(data: dict[str, Any], user_id: int):
         liked=schema.liked,
         author_id=author.id,
         tags=tags,
+        content=content,
     )
     db.session.add(article)
     db.session.commit()
@@ -143,8 +159,8 @@ def delete_articles(data: dict[str, Any], user_id: int):
 def parse_article(data: dict[str, Any]):
     schema = BasicSchema.model_validate(data)
     url = schema.name
-    parser = MetadataParser(url)
     try:
+        parser = MetadataParser(url)
         parser.parse()
     except requests.exceptions.RequestException as error:
         raise BadRequest(

@@ -1,14 +1,20 @@
 import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import { Article } from '../../constants/types';
 import { useIsDarkMode } from '../../contexts/ThemeContext';
+import { ErrorMessage } from '../features/ErrorMessage';
 
 interface DataTableProps {
   data: Article[];
   columns: GridColDef[];
+  error: Error | null;
 }
 
-function DataTable({ data, columns }: Readonly<DataTableProps>) {
+function DataTable({ data, columns, error }: Readonly<DataTableProps>) {
   const isDarkMode = useIsDarkMode();
+
+  if (error) {
+    return ErrorMessage(error.message);
+  }
 
   return (
     <div className="bg-white dark:bg-slate-900">

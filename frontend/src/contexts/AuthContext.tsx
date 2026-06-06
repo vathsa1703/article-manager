@@ -11,13 +11,15 @@ const AuthContext = createContext<Auth | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const qc = useQueryClient();
-  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isConnected, setIsConnected] = useState<boolean>(window.sessionStorage.getItem('isConnected') === 'true');
 
   const login = () => {
+    window.sessionStorage.setItem('isConnected', 'true');
     setIsConnected(true);
   };
 
   const logout = () => {
+    window.sessionStorage.setItem('isConnected', 'false');
     setIsConnected(false);
     qc.clear();
   };
