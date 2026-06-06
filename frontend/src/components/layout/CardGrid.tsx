@@ -38,10 +38,10 @@ export function CardGrid({ articles, emptyMessage, clearPatch, cardAction, error
         {articles.map((article) => (
           <Card
             key={article.id}
+            id={article.id}
             title={article.title}
             author={article.author}
             year={article.year}
-            url={article.url}
             isDarkMode={isDarkMode}
             {...(cardAction === 'liked'
               ? { onUnlike: () => handleClear(article), isUnlikePending: isEditPending }

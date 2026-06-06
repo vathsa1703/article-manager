@@ -32,7 +32,7 @@ function MetaField({ label, children }: Readonly<MetaFieldProps>) {
   return (
     <div>
       <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</p>
-      <p className="text-xs font-medium text-slate-800 dark:text-slate-100">{children}</p>
+      <div className="text-xs font-medium text-slate-800 dark:text-slate-100">{children}</div>
     </div>
   );
 }
@@ -97,36 +97,46 @@ export function MetadataVisualizer({ article }: { article: Article }) {
               </span>
             ) : null}
           </div>
-          {article.summary ? <p className="m-0 text-xs leading-snug text-slate-600 dark:text-slate-300">{article.summary}</p> : null}
         </div>
       </header>
 
-      <div className="space-y-3 p-3">
-        <div className="grid grid-cols-2 gap-2 px-0.5">
-          <MetaField label="Author">{article.author}</MetaField>
-          <MetaField label="Published">{article.year}</MetaField>
-          <MetaField label="Created">{formatDate(article.date_creation)}</MetaField>
-          <MetaField label="Updated">{formatDate(article.date_modification)}</MetaField>
-        </div>
-
-        <MetaSection title="Tags">
-          {article.tags.length ? (
-            <div className="flex flex-wrap gap-1">
-              {article.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-0.5 rounded-md border border-indigo-100 bg-indigo-50/80 px-1.5 py-0.5 text-[11px] font-medium text-indigo-700 dark:border-indigo-900/50 dark:bg-indigo-950/40 dark:text-indigo-300"
-                >
-                  <Tag size={9} aria-hidden="true" />
-                  {tag}
-                </span>
-              ))}
+      <div className="p-3">
+        <MetaSection title="Metadata">
+          <div className="grid grid-cols-2 gap-2 px-0.5">
+            <MetaField label="Author">{article.author}</MetaField>
+            <MetaField label="Published">{article.year}</MetaField>
+            <MetaField label="Created">{formatDate(article.date_creation)}</MetaField>
+            <MetaField label="Updated">{formatDate(article.date_modification)}</MetaField>
+            <div className="col-span-2">
+              <MetaField label="Tags">
+                {article.tags.length ? (
+                  <div className="flex flex-wrap gap-1">
+                    {article.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-0.5 rounded-md border border-indigo-100 bg-indigo-50/80 px-1.5 py-0.5 text-[11px] font-medium text-indigo-700 dark:border-indigo-900/50 dark:bg-indigo-950/40 dark:text-indigo-300"
+                      >
+                        <Tag size={9} aria-hidden="true" />
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-slate-500 dark:text-slate-400">No tags assigned</span>
+                )}
+              </MetaField>
             </div>
-          ) : (
-            <p className="m-0 text-xs text-slate-500 dark:text-slate-400">No tags assigned</p>
-          )}
+          </div>
         </MetaSection>
       </div>
+
+      {article.summary ? (
+        <div className="border-t border-slate-100 p-3 dark:border-slate-700/80">
+          <MetaSection title="Summary">
+            <p className="m-0 text-xs leading-snug text-slate-600 dark:text-slate-300">{article.summary}</p>
+          </MetaSection>
+        </div>
+      ) : null}
     </aside>
   );
 }
