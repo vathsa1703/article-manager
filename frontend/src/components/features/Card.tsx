@@ -13,7 +13,7 @@ interface PropsType {
   isClearReadLaterPending?: boolean;
 }
 
-function Card({
+export function Card({
   title,
   author,
   year,
@@ -82,5 +82,3 @@ function Card({
     </div>
   );
 }
-
-export default Card;

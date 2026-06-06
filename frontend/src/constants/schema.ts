@@ -17,6 +17,11 @@ export const AuthorStatSchema = z.array(
   }),
 );
 
+const TagStructureSchema = z.object({
+  tag: z.string(),
+  text: z.string(),
+});
+
 export const ArticleSchema = z.object({
   id: z.int(),
   title: z.string().min(1, ' '),
@@ -33,6 +38,7 @@ export const ArticleSchema = z.object({
   tags: z.array(z.string()),
   date_creation: z.string(),
   date_modification: z.string(),
+  content: z.array(TagStructureSchema).nullable(),
 });
 
 export const ArticlesSchema = z.array(ArticleSchema);

@@ -11,6 +11,7 @@ export interface Article {
   tags: string[];
   date_creation: string;
   date_modification: string;
+  content: TagStructure[] | null;
 }
 
 export interface ParsedMetadata {
@@ -18,6 +19,11 @@ export interface ParsedMetadata {
   author: string;
   date: string;
   url: string;
+}
+
+interface TagStructure {
+  tag: string;
+  text: string;
 }
 
 export interface Credentials {
@@ -54,3 +60,5 @@ export interface ArticleFormProps extends BaseFormProps {
 export interface UrlFormProps extends BaseFormProps {
   onSave: (url: string) => void;
 }
+
+export type GridPageCardAction = 'liked' | 'readLater';
