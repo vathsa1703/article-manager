@@ -6,7 +6,14 @@ export function useArticles() {
   return useQuery({
     queryKey: queryKeys.articles.list(),
     queryFn: articlesApi.list,
-    select: (articles) => articles.sort((a, b) => b.date_modification.localeCompare(a.date_modification)),
+  });
+}
+
+export function useArticle(id: number) {
+  return useQuery({
+    queryKey: queryKeys.articles.list(),
+    queryFn: articlesApi.list,
+    select: (articles) => articles.find((article) => article.id === id),
   });
 }
 
