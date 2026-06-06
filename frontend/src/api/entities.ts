@@ -90,14 +90,14 @@ export const authApi = {
   },
 };
 
-const parseWithError = <TSchema extends ZodType>(schema: TSchema, data: any): ZodInfer<TSchema> => {
+const parseWithError = <TSchema extends ZodType>(schema: TSchema, data: unknown): ZodInfer<TSchema> => {
   try {
     const response = schema.parse(data);
     return response;
   } catch (error: unknown) {
     if (error instanceof ZodError) {
       console.error(`Invalid API response`, error.issues);
-      throw new Error(`Invalid API response. Please try again later.`);
+      throw new Error(`Invalid API response. Please try again later.`, { cause: error });
     }
     throw error;
   }
