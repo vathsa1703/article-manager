@@ -1,12 +1,9 @@
 import { ReactNode } from 'react';
 import { Article } from '../../constants/types';
 import { useArticles } from '../../hooks/queries';
-import { useIsDarkMode } from '../../contexts/ThemeContext';
-import { useEditArticle } from '../../hooks/mutations';
-import Card from '../features/Card';
+import { CardGrid } from '../layout/CardGrid';
 import PageHeader from '../layout/PageHeader';
-
-type GridPageCardAction = 'liked' | 'readLater';
+import { GridPageCardAction } from '../../constants/types';
 
 interface GridPageProps {
   title: string;
@@ -19,14 +16,8 @@ interface GridPageProps {
 }
 
 function GridPage({ title, description, emptyMessage, filter, badge, clearPatch, cardAction }: Readonly<GridPageProps>) {
-  const { data: articles = [] } = useArticles();
-  const isDarkMode = useIsDarkMode();
-  const { mutate: editArticle, isPending: isEditPending } = useEditArticle();
+  const { data: articles = [], error } = useArticles();
   const filtered = articles.filter(filter);
-
-  function handleClear(article: Article): void {
-    editArticle(clearPatch(article));
-  }
 
   return (
     <div className="space-y-5">
@@ -34,29 +25,7 @@ function GridPage({ title, description, emptyMessage, filter, badge, clearPatch,
         {badge(filtered.length)}
       </PageHeader>
 
-      {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-500 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-300">
-          {emptyMessage}
-        </div>
-      ) : (
-        <div className="rounded-2xl p-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((article) => (
-              <Card
-                key={article.id}
-                title={article.title}
-                author={article.author}
-                year={article.year}
-                url={article.url}
-                isDarkMode={isDarkMode}
-                {...(cardAction === 'liked'
-                  ? { onUnlike: () => handleClear(article), isUnlikePending: isEditPending }
-                  : { onClearReadLater: () => handleClear(article), isClearReadLaterPending: isEditPending })}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      <CardGrid articles={filtered} emptyMessage={emptyMessage} clearPatch={clearPatch} cardAction={cardAction} error={error} />
     </div>
   );
 }
