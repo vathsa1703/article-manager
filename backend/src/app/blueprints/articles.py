@@ -37,6 +37,18 @@ def list_articles(user_id: int):
     return jsonify([article.to_dict() for article in articles]), 200
 
 
+@articles_bp.route("/<int:article_id>")
+@jwt_required()
+@get_user_id
+def get_article(user_id: int, article_id: int):
+    stmt = select(Article).where(Article.user_id == user_id, Article.id == article_id)
+    article = db.session.execute(stmt).scalar_one()
+    logger.info(
+        "Article fetched: id=%d title=%r user_id=%d", article.id, article.title, user_id
+    )
+    return jsonify(article.to_dict()), 200
+
+
 @articles_bp.route("", methods=["POST"])
 @jwt_required()
 @validate_json

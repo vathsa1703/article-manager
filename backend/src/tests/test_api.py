@@ -48,6 +48,17 @@ def test_method_not_allowed(client):
     assert res.status_code == 405
 
 
+def test_get_article(auth_client, article):
+    res = auth_client.get("/articles")
+    payload = res.get_json()
+    assert len(payload) == 1
+    article_id = int(payload[0]["id"])
+    res2 = auth_client.get(f"/articles/{article_id}")
+    assert res2.status_code == 200
+    payload2 = res2.get_json()
+    assert payload[0]["title"] == payload2["title"]
+
+
 def test_add_valid_tag(auth_client, tag):
     res = auth_client.get("/tags")
     assert res.status_code == 200
