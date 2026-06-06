@@ -5,11 +5,20 @@ import { useIsDarkMode } from '../../contexts/ThemeContext';
 interface DataTableProps {
   data: Article[];
   columns: GridColDef[];
+  error: Error | null;
 }
 
-function DataTable({ data, columns }: Readonly<DataTableProps>) {
+function DataTable({ data, columns, error }: Readonly<DataTableProps>) {
   const isDarkMode = useIsDarkMode();
 
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700 shadow-sm dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200">
+        <p className="m-0 font-semibold">Unable to load articles.</p>
+        <p className="m-0 mt-2 text-sm">{error.message}</p>
+      </div>
+    );
+  }
   return (
     <div className="bg-white dark:bg-slate-900">
       <DataGrid

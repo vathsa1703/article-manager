@@ -7,8 +7,8 @@ import DataTable from '../layout/DataTable';
 import EditButton from '../features/EditButton';
 import PageHeader from '../layout/PageHeader';
 
-function ArticlesPage() {
-  const { data: articles = [] } = useArticles();
+export default function ArticlesPage() {
+  const { data: articles = [], error } = useArticles();
   const consultedCount = articles.filter((article) => article.consulted).length;
   const likedCount = articles.filter((article) => article.liked).length;
 
@@ -101,11 +101,8 @@ function ArticlesPage() {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <DataTable data={articles} columns={COLUMNS} />
+        <DataTable data={articles} columns={COLUMNS} error={error} />
       </div>
     </div>
   );
 }
-
-// Exportation
-export default ArticlesPage;
