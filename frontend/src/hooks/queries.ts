@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { articlesApi, authorsApi, tagsApi, healthApi } from '../api/entities';
+import { articlesApi, authorsApi, tagsApi, healthApi, authApi } from '../api/entities';
 import { queryKeys } from '../api/queryKeys';
 
 export function useArticles() {
@@ -44,5 +44,13 @@ export function useHealth() {
     queryFn: healthApi.status,
     refetchInterval: 60000,
     staleTime: 60000,
+  });
+}
+
+export function useSession() {
+  return useQuery({
+    queryKey: queryKeys.auth.session(),
+    queryFn: authApi.session,
+    retry: false,
   });
 }

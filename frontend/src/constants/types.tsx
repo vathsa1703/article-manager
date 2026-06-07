@@ -62,3 +62,8 @@ export interface UrlFormProps extends BaseFormProps {
 }
 
 export type GridPageCardAction = 'liked' | 'readLater';
+
+export interface User {
+  id: number;
+  name: string;
+}
