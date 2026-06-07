@@ -8,6 +8,7 @@ import { buttonSize, buttonStyle } from '../../constants/constants';
 import { ArticleFormProps } from '../../constants/types';
 import { ArticleSchema } from '../../constants/schema';
 import { useAuthors } from '../../hooks/queries';
+import { useSettings } from '../../contexts/SettingsContext';
 import PopupWrapper from '../features/PopupWrapper';
 import RemoveButton from '../features/RemoveButton';
 
@@ -18,6 +19,7 @@ function ArticleForm({ isOpen, toggle, onSave, title, activeItem, showDeleteButt
   const [item, setItem] = useState(activeItem);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { data: authors = [] } = useAuthors();
+  const { requireSummaryOnSave } = useSettings();
   const authorOptions: AuthorOption[] = authors.map((author) => ({ value: author, label: author }));
   const selectedAuthor = authorOptions.find((option) => option.value === item.author) ?? { value: item.author, label: item.author };
   const inputClassName =
@@ -44,21 +46,26 @@ function ArticleForm({ isOpen, toggle, onSave, title, activeItem, showDeleteButt
   function validateForm() {
     const result = ArticleSchema.safeParse(item);
 
-    if (result.success) {
-      setErrors({});
-      onSave(item);
-      toggle();
+    if (!result.success) {
+      const newErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const key = issue.path[0];
+        if (typeof key === 'string' && newErrors[key] === undefined) {
+          newErrors[key] = issue.message;
+        }
+      });
+      setErrors(newErrors);
       return;
     }
 
-    const newErrors: Record<string, string> = {};
-    result.error.issues.forEach((issue) => {
-      const key = issue.path[0];
-      if (typeof key === 'string' && newErrors[key] === undefined) {
-        newErrors[key] = issue.message;
-      }
-    });
-    setErrors(newErrors);
+    if (requireSummaryOnSave && item.consulted && item.summary.trim() === '') {
+      setErrors({ summary: 'Summary is required' });
+      return;
+    }
+
+    setErrors({});
+    onSave(item);
+    toggle();
   }
 
   return (
@@ -178,7 +185,7 @@ function ArticleForm({ isOpen, toggle, onSave, title, activeItem, showDeleteButt
             </div>
             <div>
               <label htmlFor="summary" className="text-slate-800 dark:text-slate-100">
-                <b>Summary</b>
+                <b>Summary{requireSummaryOnSave ? ' *' : ''}</b>
               </label>
               <Input
                 type="textarea"

@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './style/index.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 import { AuthProvider } from './contexts/AuthContext';
 
 if (import.meta.env.DEV) {
@@ -31,7 +32,9 @@ root.render(
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <ThemeProvider>
-        <App />
+        <SettingsProvider>
+          <App />
+        </SettingsProvider>
       </ThemeProvider>
     </AuthProvider>
   </QueryClientProvider>,

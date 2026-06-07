@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LogOut, Moon, Sun, User } from 'react-feather';
 
 import { useAuth } from '../../contexts/AuthContext';
+import { useSettings } from '../../contexts/SettingsContext';
 import { useIsDarkMode, useTheme } from '../../contexts/ThemeContext';
 import { useLogout } from '../../hooks/mutations';
 
@@ -9,6 +10,7 @@ export function UserMenu() {
   const { user } = useAuth();
   const { toggle } = useTheme();
   const isDarkMode = useIsDarkMode();
+  const { requireSummaryOnSave, setRequireSummaryOnSave } = useSettings();
   const logoutMutation = useLogout();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -64,6 +66,23 @@ export function UserMenu() {
       {isOpen && (
         <div role="menu" className="user-menu__panel">
           <div className="user-menu__header">{user.name}</div>
+          <div className="user-menu__divider" />
+          <div className="user-menu__toggle-row">
+            <label htmlFor="require-summary-toggle" className="user-menu__toggle-label">
+              Require summary when saving
+            </label>
+            <button
+              id="require-summary-toggle"
+              type="button"
+              role="menuitemcheckbox"
+              aria-checked={requireSummaryOnSave}
+              aria-label="Require summary when saving an article"
+              className={`user-menu__switch ${requireSummaryOnSave ? 'user-menu__switch--on' : ''}`}
+              onClick={() => setRequireSummaryOnSave(!requireSummaryOnSave)}
+            >
+              <span className="user-menu__switch-thumb" />
+            </button>
+          </div>
           <div className="user-menu__divider" />
           <button type="button" role="menuitem" onClick={handleThemeToggle} className="user-menu__item">
             {isDarkMode ? <Sun size={16} className="text-amber-500" /> : <Moon size={16} className="text-indigo-500" />}
