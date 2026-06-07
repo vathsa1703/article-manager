@@ -1,22 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Moon, Sun } from 'react-feather';
-
 import { NavTabs } from './NavTabs';
+import { UserMenu } from './UserMenu';
 import AuthForm from '../forms/AuthForm';
 import { buttonSize, buttonStyle } from '../../constants/constants';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme, useIsDarkMode } from '../../contexts/ThemeContext';
-import { useLogout } from '../../hooks/mutations';
 
 type AuthMode = 'login' | 'register';
 
 function NavBar() {
-  const { toggle } = useTheme();
-  const isDarkMode = useIsDarkMode();
   const { isConnected } = useAuth();
-  const logoutMutation = useLogout();
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [isAuthFormOpen, setIsAuthFormOpen] = useState(false);
 
@@ -36,23 +30,8 @@ function NavBar() {
         </Link>
         <div className="justify-self-center">{isConnected && <NavTabs />}</div>
         <div className="flex items-center justify-end gap-2 justify-self-end">
-          <button
-            onClick={toggle}
-            className="rounded-lg border border-slate-300 p-2 text-slate-600 transition bg-slate-100 hover:text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-            aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            title={isDarkMode ? 'Light mode' : 'Dark mode'}
-          >
-            {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
-
           {isConnected ? (
-            <button
-              className={`${buttonStyle.error} ${buttonSize.small}`}
-              onClick={() => logoutMutation.mutate()}
-              disabled={logoutMutation.isPending}
-            >
-              Logout
-            </button>
+            <UserMenu />
           ) : (
             <>
               <button className={`${buttonStyle.neutral} ${buttonSize.small}`} onClick={() => openAuthForm('login')}>
