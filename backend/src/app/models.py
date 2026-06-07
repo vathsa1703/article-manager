@@ -109,8 +109,8 @@ class Article(db.Model):
         nullable=False,
     )
 
-    def to_dict(self):
-        return {
+    def to_dict(self, include_content=False):
+        data = {
             "id": self.id,
             "title": self.title,
             "author": self.author.name,
@@ -123,5 +123,7 @@ class Article(db.Model):
             "tags": [t.name for t in self.tags],
             "date_creation": self.date_creation.isoformat(),
             "date_modification": self.date_modification.isoformat(),
-            "content": self.content,
         }
+        if include_content:
+            data["content"] = self.content
+        return data

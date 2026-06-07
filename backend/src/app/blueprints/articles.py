@@ -46,7 +46,7 @@ def get_article(user_id: int, article_id: int):
     logger.info(
         "Article fetched: id=%d title=%r user_id=%d", article.id, article.title, user_id
     )
-    return jsonify(article.to_dict()), 200
+    return jsonify(article.to_dict(include_content=True)), 200
 
 
 @articles_bp.route("", methods=["POST"])

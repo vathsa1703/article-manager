@@ -39,6 +39,9 @@ export const ArticleSchema = z.object({
   tags: z.array(z.string()),
   date_creation: z.string(),
   date_modification: z.string(),
+});
+
+export const ArticleWithContent = ArticleSchema.extend({
   content: z.array(TagStructureSchema).nullable(),
 });
 

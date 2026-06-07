@@ -10,6 +10,7 @@ import {
   AuthorStatSchema,
   ArticleSchema,
   ArticlesSchema,
+  ArticleWithContent,
   ParsedMetadataSchema,
 } from '../constants/schema';
 import { getCookie, normalizeEntityNames } from '../helpers/helpers';
@@ -101,7 +102,7 @@ const parseWithError = <TSchema extends ZodType>(schema: TSchema, data: unknown)
     return response;
   } catch (error: unknown) {
     if (error instanceof ZodError) {
-      console.error(`Invalid API response`, error.issues);
+      console.error(`Invalid API response`, error);
       throw new Error(`Invalid API response. Please try again later.`, { cause: error });
     }
     throw error;
@@ -117,7 +118,7 @@ export const articlesApi = {
   },
   get: async (id: number): Promise<Article> => {
     const { data } = await apiClient.get(`${API_URLS.ARTICLES}/${id}`);
-    const response = parseWithError(ArticleSchema, data);
+    const response = parseWithError(ArticleWithContent, data);
     return response;
   },
   create: async (article: Article): Promise<Article> => {

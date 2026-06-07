@@ -26,9 +26,7 @@ class MetadataParser:
         self.get_date()
 
     @staticmethod
-    def get_attribute(
-        candidates: list[Candidate], html_doc: BeautifulSoup | None
-    ) -> str:
+    def get_attribute(candidates: list[Candidate], html_doc: BeautifulSoup | None):
         if not html_doc:
             return ""
         for candidate in candidates:
@@ -38,6 +36,8 @@ class MetadataParser:
                 element = MetadataParser.clean_text(element)
             if element:
                 return element
+        if candidate["location"] == "structured_text":
+            return None
         return ""
 
     @staticmethod
@@ -173,7 +173,7 @@ class MetadataParser:
         ]
         self.date = self.get_attribute(candidates, self.doc)
 
-    def parse_content(self) -> None:
+    def parse_content(self) -> list[dict] | None:
         candidates = [
             {
                 "name": "article",

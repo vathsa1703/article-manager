@@ -11,7 +11,7 @@ export interface Article {
   tags: string[];
   date_creation: string;
   date_modification: string;
-  content: TagStructure[] | null;
+  content?: TagStructure[] | null;
 }
 
 export interface ParsedMetadata {
