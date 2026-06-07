@@ -3,6 +3,7 @@ import * as z from 'zod';
 export const MessageSchema = z.object({
   msg: z.string(),
 });
+
 export const EntitySchema = z.object({
   id: z.int(),
   name: z.string(),

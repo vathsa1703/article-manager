@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API_URLS } from '../constants/constants';
-import type { Article, AuthorStat, Credentials, Message, ParsedMetadata } from '../constants/types';
+import type { Article, AuthorStat, Credentials, Message, ParsedMetadata, User } from '../constants/types';
 import {
   MessageSchema,
   DeletedArticlesSchema,
@@ -81,6 +81,11 @@ export const authApi = {
       },
     );
     const result = parseWithError(MessageSchema, data);
+    return result;
+  },
+  session: async (): Promise<User> => {
+    const { data } = await apiClient.get(API_URLS.SESSION);
+    const result = parseWithError(EntitySchema, data);
     return result;
   },
   logout: async (): Promise<Message> => {

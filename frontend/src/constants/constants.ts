@@ -10,6 +10,7 @@ export const API_URLS = {
   LOGOUT: `${baseURL}/auth/logout`,
   REGISTER: `${baseURL}/auth/register`,
   REFRESH: `${baseURL}/auth/refresh`,
+  SESSION: `${baseURL}/auth/session`,
   HEALTH: `${baseURL}/health`,
 };
 

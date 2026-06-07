@@ -1,8 +1,12 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSession } from '../hooks/queries';
+import { User } from '../constants/types';
 
 interface Auth {
+  user: User | undefined;
   isConnected: boolean;
+  isLoading: boolean;
   login: () => void;
   logout: () => void;
 }
@@ -11,20 +15,19 @@ const AuthContext = createContext<Auth | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const qc = useQueryClient();
-  const [isConnected, setIsConnected] = useState<boolean>(window.sessionStorage.getItem('isConnected') === 'true');
+  const { data: user, isLoading, refetch } = useSession();
+  const isConnected = !!user;
 
   const login = () => {
-    window.sessionStorage.setItem('isConnected', 'true');
-    setIsConnected(true);
+    refetch();
   };
 
   const logout = () => {
-    window.sessionStorage.setItem('isConnected', 'false');
-    setIsConnected(false);
     qc.clear();
+    refetch();
   };
 
-  return <AuthContext.Provider value={{ isConnected, login, logout }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, isConnected, isLoading, login, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
