@@ -39,3 +39,15 @@ def test_logout(auth_client):
 def test_method_not_allowed(client):
     res = client.get("/auth/register")
     assert res.status_code == 405
+
+
+def test_session_verified(auth_client):
+    res = auth_client.get("/auth/session")
+    assert res.status_code == 200
+    payload = res.get_json()
+    assert payload["name"] == "Test"
+
+
+def test_session_rejected(client):
+    res = client.get("/auth/session")
+    assert res.status_code == 401

@@ -17,6 +17,7 @@ from app.database import db
 from app.decorators import get_user_id, validate_json
 from app.models import User
 from app.schemas import UserSchema
+from app.services import get_entity
 
 logger = logging.getLogger("article_manager.auth")
 
@@ -73,6 +74,15 @@ def login(data: dict[str, Any]):
     set_access_cookies(response, access_token)
     set_refresh_cookies(response, refresh_token)
     return response, 200
+
+
+@auth_bp.route("/session", methods=["GET"])
+@jwt_required()
+@get_user_id
+def session(user_id: int):
+    logger.info("Session verified: user_id=%d", user_id)
+    user = get_entity(user_id, User)
+    return jsonify({"id": user_id, "name": user.name}), 200
 
 
 @auth_bp.route("/refresh", methods=["POST"])
