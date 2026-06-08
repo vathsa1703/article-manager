@@ -26,7 +26,9 @@ apiClient.interceptors.request.use((config) => {
   if (csrf_access_token) {
     config.headers['X-CSRF-TOKEN'] = csrf_access_token;
   }
-
+  if (!config.headers['X-Request-ID']) {
+    config.headers['X-Request-ID'] = crypto.randomUUID();
+  }
   return config;
 });
 
@@ -46,7 +48,7 @@ apiClient.interceptors.response.use(
 
 export const healthApi = {
   status: async (): Promise<Message> => {
-    const { data } = await axios.get(API_URLS.HEALTH);
+    const { data } = await apiClient.get(API_URLS.HEALTH);
     const result = parseWithError(MessageSchema, data);
     return result;
   },
@@ -78,6 +80,7 @@ export const authApi = {
       {
         headers: {
           'X-CSRF-TOKEN': csrf_refresh_token,
+          'X-Request-ID': crypto.randomUUID(),
         },
       },
     );
