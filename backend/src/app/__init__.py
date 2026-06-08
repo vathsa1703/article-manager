@@ -18,8 +18,7 @@ from app.blueprints.authors import authors_bp
 from app.blueprints.health import health_bp
 from app.blueprints.tags import tags_bp
 from app.database import db
-from app.exceptions import EntityDuplicatedError
-from app.types import EntitiesNotFoundError
+from app.exceptions import EntitiesNotFoundError, EntityDuplicatedError
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(BASE_DIR / ".env")

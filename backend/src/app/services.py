@@ -4,8 +4,8 @@ import unicodedata
 from sqlalchemy import select
 
 from app.database import Base, db
+from app.exceptions import EntitiesNotFoundError
 from app.models import Article, Tag
-from app.types import EntitiesNotFoundError
 
 
 def normalize_name(raw: str) -> str:
