@@ -35,7 +35,6 @@ function DataTable({ data, columns, error }: Readonly<DataTableProps>) {
             showQuickFilter: true,
           },
         }}
-        hideFooter
         sx={{
           border: 0,
           ...(isDarkMode && {
