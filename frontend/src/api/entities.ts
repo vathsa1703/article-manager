@@ -26,7 +26,9 @@ apiClient.interceptors.request.use((config) => {
   if (csrf_access_token) {
     config.headers['X-CSRF-TOKEN'] = csrf_access_token;
   }
-
+  if (!config.headers['X-Request-ID']) {
+    config.headers['X-Request-ID'] = crypto.randomUUID();
+  }
   return config;
 });
 
@@ -46,7 +48,7 @@ apiClient.interceptors.response.use(
 
 export const healthApi = {
   status: async (): Promise<Message> => {
-    const { data } = await axios.get(API_URLS.HEALTH);
+    const { data } = await apiClient.get(API_URLS.HEALTH);
     const result = parseWithError(MessageSchema, data);
     return result;
   },
@@ -78,6 +80,7 @@ export const authApi = {
       {
         headers: {
           'X-CSRF-TOKEN': csrf_refresh_token,
+          'X-Request-ID': crypto.randomUUID(),
         },
       },
     );
@@ -110,11 +113,16 @@ const parseWithError = <TSchema extends ZodType>(schema: TSchema, data: unknown)
 };
 
 export const articlesApi = {
-  list: async (): Promise<Article[]> => {
-    const { data } = await apiClient.get(API_URLS.ARTICLES);
+  list: async (offset?: number, limit?: number): Promise<{ articles: Article[]; total: number }> => {
+    let url = API_URLS.ARTICLES;
+    if (offset != undefined && limit != undefined) {
+      url = `${API_URLS.ARTICLES}?offset=${offset}&limit=${limit}`;
+    }
+    const { data } = await apiClient.get(url);
     const response = parseWithError(ArticlesSchema, data);
-    const sorted_res = response.sort((a, b) => b.date_modification.localeCompare(a.date_modification));
-    return sorted_res;
+    const articles = response['data'];
+    const total = response['total'];
+    return { articles, total };
   },
   get: async (id: number): Promise<Article> => {
     const { data } = await apiClient.get(`${API_URLS.ARTICLES}/${id}`);

@@ -9,6 +9,17 @@ from app.exceptions import EntitiesNotFoundError
 from app.models import Article, Tag
 
 
+def _normalize_database_url(url: str) -> str:
+    """Render and others often use postgres:// or postgresql://; SQLAlchemy needs the psycopg3 driver prefix."""
+    if url.startswith("postgresql+psycopg://"):
+        return url
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url.removeprefix("postgres://")
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url.removeprefix("postgresql://")
+    return url
+
+
 def normalize_name(raw: str) -> str:
     s = unicodedata.normalize("NFKC", raw or "")
     s = re.sub(r"\s+", " ", s).strip()

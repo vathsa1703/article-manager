@@ -16,7 +16,7 @@ interface GridPageProps {
 }
 
 function GridPage({ title, description, emptyMessage, filter, badge, clearPatch, cardAction }: Readonly<GridPageProps>) {
-  const { data: articles = [], error } = useArticles();
+  const { data: { articles = [] } = {}, error } = useArticles();
   const filtered = articles.filter(filter);
 
   return (

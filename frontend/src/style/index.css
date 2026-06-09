@@ -133,6 +133,59 @@ body {
   background-color: #1e293b;
 }
 
+.dark .app-data-grid .MuiDataGrid-footerContainer {
+  border-top-color: #334155;
+}
+
+.dark .app-data-grid .MuiTablePagination-root,
+.dark .app-data-grid .MuiTablePagination-selectLabel,
+.dark .app-data-grid .MuiTablePagination-displayedRows {
+  color: #cbd5e1;
+}
+
+.dark .app-data-grid .MuiTablePagination-select {
+  color: #e2e8f0;
+}
+
+.dark .app-data-grid .MuiTablePagination-select .MuiSelect-select {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+}
+
+.dark .app-data-grid .MuiTablePagination-select .MuiSelect-icon,
+.dark .app-data-grid .MuiTablePagination-select .MuiTablePagination-selectIcon {
+  color: #94a3b8 !important;
+  fill: currentColor;
+}
+
+.dark .app-data-grid .MuiTablePagination-actions .MuiIconButton-root {
+  color: #cbd5e1;
+}
+
+.dark .app-data-grid .MuiTablePagination-actions .MuiIconButton-root:hover {
+  background-color: #1e293b;
+}
+
+.dark .app-data-grid .MuiTablePagination-actions .MuiIconButton-root.Mui-disabled {
+  color: #64748b;
+}
+
+.dark .MuiMenu-paper:has(.MuiTablePagination-menuItem) {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+}
+
+.dark .MuiMenu-paper:has(.MuiTablePagination-menuItem) .MuiMenuItem-root {
+  color: #e2e8f0;
+}
+
+.dark .MuiMenu-paper:has(.MuiTablePagination-menuItem) .MuiMenuItem-root:hover,
+.dark .MuiMenu-paper:has(.MuiTablePagination-menuItem) .MuiMenuItem-root.Mui-selected {
+  background-color: #334155;
+}
+
 .dark .app-data-grid .MuiCheckbox-root {
   color: #64748b;
 }

@@ -61,7 +61,7 @@ def test_per_user_isolation(client, mock_article):
 
     post1 = client.post("/articles", json=mock_article, headers=headers1)
     assert post1.status_code == 201
-    payload1 = client.get("/articles", headers=headers1).get_json()
+    payload1 = client.get("/articles", headers=headers1).get_json()["data"]
     assert len(payload1) == 1
     article_id = post1.get_json()["id"]
 
@@ -71,7 +71,8 @@ def test_per_user_isolation(client, mock_article):
     headers2 = get_csrf_header(res2, "access")
 
     # User B cannot see User A articles
-    assert len(client.get("/articles", headers=headers2).get_json()) == 0
+    payload = client.get("/articles", headers=headers2).get_json()["data"]
+    assert len(payload) == 0
 
     # User B cannot modify/delete User A articles
     edited = {**mock_article, "id": article_id, "title": "hacked"}
@@ -87,4 +88,5 @@ def test_per_user_isolation(client, mock_article):
     res3 = client.post("/auth/login", json={"name": "Test", "password": "Test"})
     assert res3.status_code == 200
     headers3 = get_csrf_header(res3, "access")
-    assert len(client.get("/articles", headers=headers3).get_json()) == 1
+    payload = client.get("/articles", headers=headers3).get_json()["data"]
+    assert len(payload) == 1

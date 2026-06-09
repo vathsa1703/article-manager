@@ -1,6 +1,4 @@
-import logging
 import os
-import time
 from datetime import timedelta
 from pathlib import Path
 
@@ -19,21 +17,16 @@ from app.blueprints.health import health_bp
 from app.blueprints.tags import tags_bp
 from app.database import db
 from app.exceptions import EntitiesNotFoundError, EntityDuplicatedError
+from app.log_config import configure_logging, register_logging
 from app.services import _normalize_database_url
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(BASE_DIR / ".env")
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-
-logger = logging.getLogger("article_manager")
+logger = configure_logging()
 
 
-def create_app(test_config=None) -> Flask:
+def create_app(test_config=None):
     app = Flask(__name__)
 
     if test_config is not None:
@@ -72,22 +65,7 @@ def create_app(test_config=None) -> Flask:
     Migrate(app, db)
     JWTManager(app)
 
-    @app.before_request
-    def _log_request_start():
-        request.start_time = time.perf_counter()
-        logger.info("→ %s %s", request.method, request.path)
-
-    @app.after_request
-    def _log_request_end(response):
-        duration_ms = (time.perf_counter() - request.start_time) * 1000
-        logger.info(
-            "← %s %s %d (%.1fms)",
-            request.method,
-            request.path,
-            response.status_code,
-            duration_ms,
-        )
-        return response
+    register_logging(app, logger)
 
     @app.route("/favicon.ico")
     def favicon():

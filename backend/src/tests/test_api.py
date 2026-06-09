@@ -10,7 +10,7 @@ def test_health(client):
 
 def test_get_article(auth_client, article):
     res = auth_client.get("/articles")
-    payload = res.get_json()
+    payload = res.get_json()["data"]
     assert len(payload) == 1
     article_id = int(payload[0]["id"])
     res2 = auth_client.get(f"/articles/{article_id}")
@@ -49,14 +49,14 @@ def test_delete_entity(auth_client, endpoint):
 
 def test_delete_article(auth_client, article):
     res = auth_client.get("/articles")
-    payload = res.get_json()
+    payload = res.get_json()["data"]
     assert len(payload) == 1
     article_id = int(payload[0]["id"])
     res_delete = auth_client.delete("/articles", json={"ids": [article_id]})
     assert res_delete.status_code == 200
     assert res_delete.get_json()["count"] == 1
     new_res = auth_client.get("/articles")
-    new_payload = new_res.get_json()
+    new_payload = new_res.get_json()["data"]
     assert len(new_payload) == 0
 
 
@@ -76,7 +76,7 @@ def test_add_invalid_author(auth_client):
 def test_add_valid_article(auth_client, article):
     res = auth_client.get("/articles")
     assert res.status_code == 200
-    payload = res.get_json()
+    payload = res.get_json()["data"]
     assert len(payload) == 1
     assert payload[0]["title"] == article["title"]
 
@@ -120,3 +120,28 @@ def test_duplicated_url(auth_client, article, mock_article_2):
     res = auth_client.post("/articles", json=mock_article_2)
     assert res.status_code == 409
     assert "duplicate" in res.get_json()["error"]
+
+
+def test_list_articles_pagination(auth_client, create_list_authors_articles):
+    res = auth_client.get("/articles")
+    assert res.status_code == 200
+    payload = res.get_json()["data"]
+    assert len(payload) == 6
+
+    res2 = auth_client.get("/articles?offset=2&limit=2")
+    assert res2.status_code == 200
+    payload2 = res2.get_json()["data"]
+    assert len(payload2) == 2
+
+    assert payload[2]["id"] == payload2[0]["id"]
+    assert payload[3]["id"] == payload2[1]["id"]
+
+
+def test_list_articles_rejects_negative_offset(auth_client):
+    res = auth_client.get("/articles?offset=-1&limit=2")
+    assert res.status_code == 400
+
+
+def test_list_articles_rejects_zero_limit(auth_client):
+    res = auth_client.get("/articles?offset=0&limit=0")
+    assert res.status_code == 400

@@ -1,3 +1,4 @@
+import { AlertTriangle } from 'react-feather';
 import PopupWrapper from '../features/PopupWrapper';
 import { buttonSize, buttonStyle } from '../../constants/constants';
 
@@ -5,20 +6,26 @@ interface FormProps {
   isOpen: boolean;
   toggle: () => void;
   onSave: () => void;
+  isPending?: boolean;
 }
 
-function ConfirmationForm({ isOpen, toggle, onSave }: Readonly<FormProps>) {
+function ConfirmationForm({ isOpen, toggle, onSave, isPending = false }: Readonly<FormProps>) {
   return (
-    <PopupWrapper popup={isOpen} setPopup={toggle} status="neutral">
-      <div className="flex flex-col space-y-6">
-        <h1 className="text-center text-2xl font-bold text-black dark:text-slate-100">{'Confirmation'}</h1>
-        <div className="text-slate-700 dark:text-slate-200">{'Are you sure you want to delete this item?'}</div>
-        <div className="flex flex-row justify-between">
-          <button className={`${buttonStyle.error} ${buttonSize.medium}`} onClick={toggle}>
+    <PopupWrapper popup={isOpen} setPopup={toggle} status="error">
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="rounded-full bg-rose-100 p-3 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+            <AlertTriangle size={28} strokeWidth={2} />
+          </div>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Delete this article?</h1>
+          <p className="text-sm text-slate-600 dark:text-slate-300">This action cannot be undone.</p>
+        </div>
+        <div className="flex justify-between gap-3">
+          <button type="button" className={`${buttonStyle.neutral} ${buttonSize.small}`} onClick={toggle} disabled={isPending}>
             Cancel
           </button>
-          <button className={`${buttonStyle.success} ${buttonSize.medium}`} onClick={onSave}>
-            Confirm
+          <button type="button" className={`${buttonStyle.error} ${buttonSize.small}`} onClick={onSave} disabled={isPending}>
+            {isPending ? 'Deleting…' : 'Delete'}
           </button>
         </div>
       </div>
