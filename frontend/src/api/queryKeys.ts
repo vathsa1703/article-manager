@@ -2,6 +2,7 @@ export const queryKeys = {
   articles: {
     all: ['articles'],
     list: () => [...queryKeys.articles.all, 'list'],
+    slice: (page: number, pageSize: number) => [...queryKeys.articles.all, page, pageSize],
     detail: (id: number) => [...queryKeys.articles.all, 'detail', id],
   },
   tags: {

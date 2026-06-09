@@ -4,12 +4,24 @@ import { useIsDarkMode } from '../../contexts/ThemeContext';
 import { ErrorMessage } from '../features/ErrorMessage';
 
 interface DataTableProps {
-  data: Article[];
+  rows: Article[];
   columns: GridColDef[];
+  isFetching: boolean;
   error: Error | null;
+  total: number;
+  paginationModel: {
+    page: number;
+    pageSize: number;
+  };
+  setPaginationModel: React.Dispatch<
+    React.SetStateAction<{
+      page: number;
+      pageSize: number;
+    }>
+  >;
 }
 
-function DataTable({ data, columns, error }: Readonly<DataTableProps>) {
+function DataTable({ rows, columns, isFetching, error, total, paginationModel, setPaginationModel }: Readonly<DataTableProps>) {
   const isDarkMode = useIsDarkMode();
 
   if (error) {
@@ -20,8 +32,14 @@ function DataTable({ data, columns, error }: Readonly<DataTableProps>) {
     <div className="bg-white dark:bg-slate-900">
       <DataGrid
         className="app-data-grid"
-        rows={data}
+        rows={rows}
         columns={columns}
+        loading={isFetching}
+        paginationMode="server"
+        paginationModel={paginationModel}
+        onPaginationModelChange={setPaginationModel}
+        rowCount={total}
+        pageSizeOptions={[25]}
         autoHeight
         getRowHeight={() => 'auto'}
         disableColumnFilter

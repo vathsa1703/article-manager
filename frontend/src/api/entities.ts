@@ -113,11 +113,16 @@ const parseWithError = <TSchema extends ZodType>(schema: TSchema, data: unknown)
 };
 
 export const articlesApi = {
-  list: async (): Promise<Article[]> => {
-    const { data } = await apiClient.get(API_URLS.ARTICLES);
+  list: async (offset?: number, limit?: number): Promise<{ articles: Article[]; total: number }> => {
+    let url = API_URLS.ARTICLES;
+    if (offset != undefined && limit != undefined) {
+      url = `${API_URLS.ARTICLES}?offset=${offset}&limit=${limit}`;
+    }
+    const { data } = await apiClient.get(url);
     const response = parseWithError(ArticlesSchema, data);
-    const sorted_res = response.sort((a, b) => b.date_modification.localeCompare(a.date_modification));
-    return sorted_res;
+    const articles = response['data'];
+    const total = response['total'];
+    return { articles, total };
   },
   get: async (id: number): Promise<Article> => {
     const { data } = await apiClient.get(`${API_URLS.ARTICLES}/${id}`);
