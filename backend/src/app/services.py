@@ -4,9 +4,10 @@ from collections.abc import Sequence
 
 from sqlalchemy import select
 
-from app.database import Base, db
+from app.database import db
 from app.exceptions import EntitiesNotFoundError
 from app.models import Article, Tag
+from app.types import NamedEntity, UserScoped
 
 
 def _normalize_database_url(url: str) -> str:
@@ -26,7 +27,7 @@ def normalize_name(raw: str) -> str:
     return s.casefold()
 
 
-def get_or_create_by_name[T: Base](model: type[T], name: str, user_id: int) -> T:
+def get_or_create_by_name[T: NamedEntity](model: type[T], name: str, user_id: int) -> T:
     normalized_name = normalize_name(name)
     stmt = select(model).where(
         model.normalized_name == normalized_name, model.user_id == user_id
@@ -66,7 +67,7 @@ def update_model_fields(instance, payload: dict, allowed_fields: set[str]) -> No
             setattr(instance, field, value)
 
 
-def get_entity[T: Base](
+def get_entity[T: NamedEntity](
     entity_id: int, model: type[T], user_id: int | None = None
 ) -> T:
     stmt = select(model).where(model.id == entity_id)
@@ -78,7 +79,7 @@ def get_entity[T: Base](
     return entity
 
 
-def get_entities[T: Base](
+def get_entities[T: UserScoped](
     ids: Sequence[int], model: type[T], user_id: int | None = None
 ) -> Sequence[T]:
     dedup_ids = set(ids)
@@ -104,14 +105,3 @@ def get_articles_by_author(author_id: int, user_id: int) -> Sequence[Article]:
     )
     articles = db.session.execute(stmt).scalars().all()
     return articles
-
-
-def _normalize_database_url(url: str) -> str:
-    """Render and others often use postgres:// or postgresql://; SQLAlchemy needs the psycopg3 driver prefix."""
-    if url.startswith("postgresql+psycopg://"):
-        return url
-    if url.startswith("postgres://"):
-        return "postgresql+psycopg://" + url.removeprefix("postgres://")
-    if url.startswith("postgresql://"):
-        return "postgresql+psycopg://" + url.removeprefix("postgresql://")
-    return url

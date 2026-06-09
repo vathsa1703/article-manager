@@ -79,7 +79,7 @@ def add_article(data: dict[str, Any], user_id: int):
         raise EntityDuplicatedError("Add article", user_id, "URL", schema.url)
 
     parser = MetadataParser(schema.url)
-    content = parser.parse_content()
+    content = parser.get_content()
 
     tags = associate_tags(schema.tags, user_id)
     author = get_or_create_by_name(Author, schema.author, user_id)
