@@ -66,6 +66,7 @@ function DataTable({ rows, columns, isFetching, error, total, paginationModel, s
               },
           }),
         }}
+        showToolbar
       />
     </div>
   );
