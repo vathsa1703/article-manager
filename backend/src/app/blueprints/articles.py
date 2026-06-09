@@ -4,11 +4,11 @@ from typing import Any
 import requests
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
-from sqlalchemy import select
+from sqlalchemy import func, select
 from werkzeug.exceptions import BadRequest
 
 from app.database import db
-from app.decorators import get_user_id, validate_json
+from app.decorators import get_pagination, get_user_id, validate_json
 from app.exceptions import EntityDuplicatedError
 from app.models import Article, Author
 from app.parser import MetadataParser
@@ -30,11 +30,31 @@ articles_bp = Blueprint("articles", __name__, url_prefix="/articles")
 @articles_bp.route("")
 @jwt_required()
 @get_user_id
-def list_articles(user_id: int):
-    stmt = select(Article).where(Article.user_id == user_id)
+@get_pagination
+def list_articles(user_id: int, offset: int | None = None, limit: int | None = None):
+    stmt = (
+        select(Article)
+        .where(Article.user_id == user_id)
+        .order_by(Article.date_modification.desc(), Article.id.desc())
+    )
+    if offset is not None:
+        stmt = stmt.offset(offset)
+    if limit is not None:
+        stmt = stmt.limit(limit)
     articles = db.session.execute(stmt).scalars().all()
     logger.debug("Listed %d articles for user_id=%d", len(articles), user_id)
-    return jsonify([article.to_dict() for article in articles]), 200
+    count_stmt = (
+        select(func.count()).select_from(Article).where(Article.user_id == user_id)
+    )
+    total = db.session.execute(count_stmt).scalar_one()
+    return jsonify(
+        {
+            "data": [article.to_dict() for article in articles],
+            "total": total,
+            "offset": offset,
+            "limit": limit,
+        }
+    ), 200
 
 
 @articles_bp.route("/<int:article_id>")

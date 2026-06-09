@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { GridColDef } from '@mui/x-data-grid';
 import { Heart } from 'react-feather';
 import { useArticles } from '../../hooks/queries';
@@ -9,9 +10,11 @@ import EditButton from '../features/EditButton';
 import PageHeader from '../layout/PageHeader';
 
 export default function ArticlesPage() {
-  const { data: articles = [], error } = useArticles();
-  const consultedCount = articles.filter((article) => article.consulted).length;
-  const likedCount = articles.filter((article) => article.liked).length;
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 25,
+  });
+  const { data: { articles = [], total = 0 } = {}, isFetching, error } = useArticles(paginationModel.page, paginationModel.pageSize);
 
   const TITLE_ADD_FORM: string = 'Add article';
   const COLUMNS: GridColDef[] = [
@@ -93,11 +96,7 @@ export default function ArticlesPage() {
     <div className="flex flex-col gap-5">
       <PageHeader title="Articles" description="Manage your library and track your reading at a glance.">
         <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
-          <span className="rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-700">{articles.length} total</span>
-          <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-            {consultedCount} consulted
-          </span>
-          <span className="rounded-full bg-red-100 px-3 py-1 text-red-700 dark:bg-red-900/40 dark:text-red-300">{likedCount} liked</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-700">{total} total</span>
         </div>
       </PageHeader>
 
@@ -106,7 +105,15 @@ export default function ArticlesPage() {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <DataTable data={articles} columns={COLUMNS} error={error} />
+        <DataTable
+          rows={articles}
+          columns={COLUMNS}
+          total={total}
+          isFetching={isFetching}
+          error={error}
+          paginationModel={paginationModel}
+          setPaginationModel={setPaginationModel}
+        />
       </div>
     </div>
   );

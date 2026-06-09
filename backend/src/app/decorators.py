@@ -2,6 +2,7 @@ from functools import wraps
 
 from flask import jsonify, request
 from flask_jwt_extended import get_jwt_identity
+from werkzeug.exceptions import BadRequest
 
 
 def validate_json(fn):
@@ -22,5 +23,19 @@ def get_user_id(fn):
     def wrapper(*args, **kwargs):
         user_id = int(get_jwt_identity())
         return fn(*args, user_id=user_id, **kwargs)
+
+    return wrapper
+
+
+def get_pagination(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        offset = request.args.get("offset", type=int)
+        limit = request.args.get("limit", type=int)
+        if offset is not None and offset < 0:
+            raise BadRequest("Offset should be greater than or equal to 0.")
+        if limit is not None and limit <= 0:
+            raise BadRequest("Limit should be greater than 0.")
+        return fn(*args, offset=offset, limit=limit, **kwargs)
 
     return wrapper

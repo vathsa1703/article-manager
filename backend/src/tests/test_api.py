@@ -10,7 +10,7 @@ def test_health(client):
 
 def test_get_article(auth_client, article):
     res = auth_client.get("/articles")
-    payload = res.get_json()
+    payload = res.get_json()["data"]
     assert len(payload) == 1
     article_id = int(payload[0]["id"])
     res2 = auth_client.get(f"/articles/{article_id}")
@@ -49,14 +49,14 @@ def test_delete_entity(auth_client, endpoint):
 
 def test_delete_article(auth_client, article):
     res = auth_client.get("/articles")
-    payload = res.get_json()
+    payload = res.get_json()["data"]
     assert len(payload) == 1
     article_id = int(payload[0]["id"])
     res_delete = auth_client.delete("/articles", json={"ids": [article_id]})
     assert res_delete.status_code == 200
     assert res_delete.get_json()["count"] == 1
     new_res = auth_client.get("/articles")
-    new_payload = new_res.get_json()
+    new_payload = new_res.get_json()["data"]
     assert len(new_payload) == 0
 
 
@@ -76,7 +76,7 @@ def test_add_invalid_author(auth_client):
 def test_add_valid_article(auth_client, article):
     res = auth_client.get("/articles")
     assert res.status_code == 200
-    payload = res.get_json()
+    payload = res.get_json()["data"]
     assert len(payload) == 1
     assert payload[0]["title"] == article["title"]
 
@@ -123,7 +123,7 @@ def test_per_user_isolation(client, mock_article):
 
     post1 = client.post("/articles", json=mock_article, headers=headers1)
     assert post1.status_code == 201
-    payload1 = client.get("/articles", headers=headers1).get_json()
+    payload1 = client.get("/articles", headers=headers1).get_json()["data"]
     assert len(payload1) == 1
     article_id = post1.get_json()["id"]
 
@@ -133,7 +133,8 @@ def test_per_user_isolation(client, mock_article):
     headers2 = get_csrf_header(res2, "access")
 
     # User B cannot see User A articles
-    assert len(client.get("/articles", headers=headers2).get_json()) == 0
+    payload2 = client.get("/articles", headers=headers2).get_json()["data"]
+    assert len(payload2) == 0
 
     # User B cannot modify/delete User A articles
     edited = {**mock_article, "id": article_id, "title": "hacked"}
@@ -149,7 +150,8 @@ def test_per_user_isolation(client, mock_article):
     res3 = client.post("/auth/login", json={"name": "Test", "password": "Test"})
     assert res3.status_code == 200
     headers3 = get_csrf_header(res3, "access")
-    assert len(client.get("/articles", headers=headers3).get_json()) == 1
+    payload = client.get("/articles", headers=headers3).get_json()["data"]
+    assert len(payload) == 1
 
 
 def test_duplicated_url(auth_client, article, mock_article_2):
@@ -157,3 +159,28 @@ def test_duplicated_url(auth_client, article, mock_article_2):
     res = auth_client.post("/articles", json=mock_article_2)
     assert res.status_code == 409
     assert "duplicate" in res.get_json()["error"]
+
+
+def test_list_articles_pagination(auth_client, create_list_authors_articles):
+    res = auth_client.get("/articles")
+    assert res.status_code == 200
+    payload = res.get_json()["data"]
+    assert len(payload) == 6
+
+    res2 = auth_client.get("/articles?offset=2&limit=2")
+    assert res2.status_code == 200
+    payload2 = res2.get_json()["data"]
+    assert len(payload2) == 2
+
+    assert payload[2]["id"] == payload2[0]["id"]
+    assert payload[3]["id"] == payload2[1]["id"]
+
+
+def test_list_articles_rejects_negative_offset(auth_client):
+    res = auth_client.get("/articles?offset=-1&limit=2")
+    assert res.status_code == 400
+
+
+def test_list_articles_rejects_zero_limit(auth_client):
+    res = auth_client.get("/articles?offset=0&limit=0")
+    assert res.status_code == 400

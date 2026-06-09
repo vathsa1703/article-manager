@@ -12,7 +12,7 @@ type ReadByMonthStat = {
 };
 
 function StatsPage() {
-  const { data: articles = [] } = useArticles();
+  const { data: { articles = [] } = {} } = useArticles();
   const { data: topAuthors = [] } = useTopAuthors();
   const isDarkMode = useIsDarkMode();
   const axisColor = isDarkMode ? '#cbd5e1' : '#475569';
