@@ -8,6 +8,11 @@ from bs4.element import Tag
 type Candidate = dict[str, Any]
 
 
+class Content:
+    tag: str
+    text: str
+
+
 class MetadataParser:
     BLOCK_TAGS = {"h1", "h2", "h3", "h4", "h5", "h6", "p", "blockquote", "li"}
     IGNORED_TAGS = {"script", "style", "nav", "footer", "aside"}
@@ -18,7 +23,7 @@ class MetadataParser:
         self.title = ""
         self.author = ""
         self.date = ""
-        self.content = {}
+        self.content: list[Content] = []
 
     def parse(self):
         self.get_title()
@@ -26,7 +31,9 @@ class MetadataParser:
         self.get_date()
 
     @staticmethod
-    def get_attribute(candidates: list[Candidate], html_doc: BeautifulSoup | None):
+    def get_attribute(
+        candidates: list[Candidate], html_doc: BeautifulSoup | None
+    ) -> str | None:
         if not html_doc:
             return ""
         for candidate in candidates:
@@ -87,7 +94,7 @@ class MetadataParser:
             return ""
         return text.strip()
 
-    def parse_document(self, url: str) -> None:
+    def parse_document(self, url: str) -> BeautifulSoup:
         headers = {"User-Agent": "ArticleManager/1.0"}
         res = requests.get(url, headers=headers, timeout=10)
         res.raise_for_status()

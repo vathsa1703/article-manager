@@ -1,5 +1,6 @@
 import re
 import unicodedata
+from collections.abc import Sequence
 
 from sqlalchemy import select
 
@@ -36,7 +37,7 @@ def check_url_uniqueness(
     return entity is None or entity.id == existing_id
 
 
-def associate_tags(raw_tags: list[str], user_id: int) -> list[str]:
+def associate_tags(raw_tags: list[str], user_id: int) -> list[Tag]:
     seen = set()
     tags = []
     for raw_tag in raw_tags:
@@ -67,8 +68,8 @@ def get_entity[T: Base](
 
 
 def get_entities[T: Base](
-    ids: list[int], model: type[T], user_id: int | None = None
-) -> list[T]:
+    ids: Sequence[int], model: type[T], user_id: int | None = None
+) -> Sequence[T]:
     dedup_ids = set(ids)
     stmt = select(model).where(model.id.in_(dedup_ids))
     if user_id is not None:
@@ -86,7 +87,7 @@ def get_entities[T: Base](
     )
 
 
-def get_articles_by_author(author_id: int, user_id: int) -> list[Article]:
+def get_articles_by_author(author_id: int, user_id: int) -> Sequence[Article]:
     stmt = select(Article).where(
         Article.author_id == author_id, Article.user_id == user_id
     )

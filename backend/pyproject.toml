@@ -6,3 +6,12 @@ exclude = [".venv", "__pycache__", ".pytest_cache"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
 ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+files = ["src/app"]
+strict = false
+warn_return_any = true
+warn_unused_ignores = true
+plugins = ["sqlalchemy.ext.mypy.plugin"]
