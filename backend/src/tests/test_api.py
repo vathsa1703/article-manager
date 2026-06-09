@@ -157,3 +157,28 @@ def test_duplicated_url(auth_client, article, mock_article_2):
     res = auth_client.post("/articles", json=mock_article_2)
     assert res.status_code == 409
     assert "duplicate" in res.get_json()["error"]
+
+
+def test_list_articles_pagination(auth_client, create_list_authors_articles):
+    res = auth_client.get("/articles")
+    assert res.status_code == 200
+    payload = res.get_json()
+    assert len(payload) == 6
+
+    res2 = auth_client.get("/articles?offset=2&limit=2")
+    assert res2.status_code == 200
+    payload2 = res2.get_json()
+    assert len(payload2) == 2
+
+    assert payload[2]["id"] == payload2[0]["id"]
+    assert payload[3]["id"] == payload2[1]["id"]
+
+
+def test_list_articles_rejects_negative_offset(auth_client):
+    res = auth_client.get("/articles?offset=-1&limit=2")
+    assert res.status_code == 400
+
+
+def test_list_articles_rejects_zero_limit(auth_client):
+    res = auth_client.get("/articles?offset=0&limit=0")
+    assert res.status_code == 400
