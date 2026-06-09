@@ -1,65 +1,37 @@
 import re
-from typing import Any
+from typing import Any, Literal, NotRequired, TypedDict
 
 import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-type Candidate = dict[str, Any]
+
+class Candidate(TypedDict):
+    name: str | Literal[True]
+    location: NotRequired[Literal["content", "datetime", "structured_text", "text"]]
+    kwargs: NotRequired[dict[str, Any]]
 
 
-class Content:
-    tag: str
-    text: str
-
-
-class MetadataParser:
+class ContentParser:
     BLOCK_TAGS = {"h1", "h2", "h3", "h4", "h5", "h6", "p", "blockquote", "li"}
     IGNORED_TAGS = {"script", "style", "nav", "footer", "aside"}
 
-    def __init__(self, url: str):
-        self.url = url
-        self.doc: BeautifulSoup | None = self.parse_document(self.url)
-        self.title = ""
-        self.author = ""
-        self.date = ""
-        self.content: list[Content] = []
-
-    def parse(self):
-        self.get_title()
-        self.get_author()
-        self.get_date()
-
     @staticmethod
-    def get_attribute(
-        candidates: list[Candidate], html_doc: BeautifulSoup | None
-    ) -> str | None:
-        if not html_doc:
-            return ""
-        for candidate in candidates:
-            tag = html_doc.find(candidate["name"], **candidate.get("kwargs", {}))
-            element = MetadataParser.extract_text(tag, candidate["location"])
-            if candidate["location"] != "structured_text":
-                element = MetadataParser.clean_text(element)
-            if element:
-                return element
-        if candidate["location"] == "structured_text":
-            return None
-        return ""
+    def extract_structured_text(container: Tag | None) -> list[dict[str, str]]:
+        blocks: list[dict[str, str]] = []
 
-    @staticmethod
-    def extract_structured_text(container: Tag) -> list[dict[str, str]]:
-        blocks = []
+        if container is None:
+            return blocks
 
         def walk(node: Tag) -> None:
             for child in node.children:
                 if not isinstance(child, Tag):
                     continue
 
-                if child.name in MetadataParser.IGNORED_TAGS:
+                if child.name in ContentParser.IGNORED_TAGS:
                     continue
 
-                if child.name in MetadataParser.BLOCK_TAGS:
+                if child.name in ContentParser.BLOCK_TAGS:
                     text = MetadataParser.clean_text(child.get_text(" ", strip=True))
                     if text:
                         blocks.append({"tag": child.name, "text": text})
@@ -69,6 +41,48 @@ class MetadataParser:
 
         walk(container)
         return blocks
+
+    @staticmethod
+    def get_content(
+        candidates: list[Candidate], html_doc: BeautifulSoup | None
+    ) -> list[dict[str, str]] | None:
+        if not html_doc:
+            return None
+        for candidate in candidates:
+            tag = html_doc.find(candidate["name"], **candidate.get("kwargs", {}))
+            element = ContentParser.extract_structured_text(tag)
+            if element:
+                return element
+        return None
+
+
+class MetadataParser:
+    def __init__(self, url: str):
+        self.url = url
+        self.doc: BeautifulSoup | None = self.get_document(self.url)
+        self.title = ""
+        self.author = ""
+        self.date = ""
+        self.content: list[dict] = []
+
+    def parse(self):
+        self.get_title()
+        self.get_author()
+        self.get_date()
+
+    @staticmethod
+    def get_attribute(
+        candidates: list[Candidate], html_doc: BeautifulSoup | None
+    ) -> str:
+        if not html_doc:
+            return ""
+        for candidate in candidates:
+            tag = html_doc.find(candidate["name"], **candidate.get("kwargs", {}))
+            element = MetadataParser.extract_text(tag, candidate["location"])
+            element = MetadataParser.clean_text(element)
+            if element:
+                return element
+        return ""
 
     @staticmethod
     def extract_text(tag: Tag | None, location: str) -> str | None:
@@ -84,8 +98,6 @@ class MetadataParser:
             if datetime_value and isinstance(datetime_value, str):
                 return datetime_value
             return ""
-        if location == "structured_text":
-            return MetadataParser.extract_structured_text(tag)
         return tag.get_text()
 
     @staticmethod
@@ -94,14 +106,14 @@ class MetadataParser:
             return ""
         return text.strip()
 
-    def parse_document(self, url: str) -> BeautifulSoup:
+    def get_document(self, url: str) -> BeautifulSoup:
         headers = {"User-Agent": "ArticleManager/1.0"}
         res = requests.get(url, headers=headers, timeout=10)
         res.raise_for_status()
         return BeautifulSoup(res.text, "html.parser")
 
     def get_title(self) -> None:
-        candidates = [
+        candidates: list[Candidate] = [
             {"name": "meta", "kwargs": {"property": "og:title"}, "location": "content"},
             {
                 "name": "meta",
@@ -114,7 +126,7 @@ class MetadataParser:
         self.title = MetadataParser.get_attribute(candidates, self.doc)
 
     def get_author(self) -> None:
-        candidates = [
+        candidates: list[Candidate] = [
             {
                 "name": "meta",
                 "kwargs": {"attrs": {"name": "author"}},
@@ -140,7 +152,7 @@ class MetadataParser:
         self.author = self.get_attribute(candidates, self.doc)
 
     def get_date(self) -> None:
-        candidates = [
+        candidates: list[Candidate] = [
             {
                 "name": "meta",
                 "kwargs": {"property": "article:published_time"},
@@ -180,62 +192,23 @@ class MetadataParser:
         ]
         self.date = self.get_attribute(candidates, self.doc)
 
-    def parse_content(self) -> list[dict] | None:
-        candidates = [
-            {
-                "name": "article",
-                "location": "structured_text",
-            },
-            {
-                "name": "main",
-                "location": "structured_text",
-            },
-            {
-                "name": True,
-                "kwargs": {"attrs": {"class": "article-content"}},
-                "location": "structured_text",
-            },
+    def get_content(self) -> list[dict] | None:
+        candidates: list[Candidate] = [
+            {"name": "article"},
+            {"name": "main"},
+            {"name": True, "kwargs": {"attrs": {"class": "article-content"}}},
             {
                 "name": True,
                 "kwargs": {
                     "attrs": {"class": re.compile(r"(?:^|-)postcontent$|post-content")}
                 },
-                "location": "structured_text",
             },
-            {
-                "name": True,
-                "kwargs": {"attrs": {"class": "entry-content"}},
-                "location": "structured_text",
-            },
-            {
-                "name": True,
-                "kwargs": {"attrs": {"class": "content"}},
-                "location": "structured_text",
-            },
-            {
-                "name": True,
-                "kwargs": {"attrs": {"class": "article-body"}},
-                "location": "structured_text",
-            },
-            {
-                "name": True,
-                "kwargs": {"attrs": {"class": "post-body"}},
-                "location": "structured_text",
-            },
-            {
-                "name": True,
-                "kwargs": {"attrs": {"id": "article"}},
-                "location": "structured_text",
-            },
-            {
-                "name": True,
-                "kwargs": {"attrs": {"id": "content"}},
-                "location": "structured_text",
-            },
-            {
-                "name": True,
-                "kwargs": {"attrs": {"id": "main-content"}},
-                "location": "structured_text",
-            },
+            {"name": True, "kwargs": {"attrs": {"class": "entry-content"}}},
+            {"name": True, "kwargs": {"attrs": {"class": "content"}}},
+            {"name": True, "kwargs": {"attrs": {"class": "article-body"}}},
+            {"name": True, "kwargs": {"attrs": {"class": "post-body"}}},
+            {"name": True, "kwargs": {"attrs": {"id": "article"}}},
+            {"name": True, "kwargs": {"attrs": {"id": "content"}}},
+            {"name": True, "kwargs": {"attrs": {"id": "main-content"}}},
         ]
-        return self.get_attribute(candidates, self.doc)
+        return ContentParser.get_content(candidates, self.doc)
