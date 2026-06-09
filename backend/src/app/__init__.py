@@ -19,6 +19,7 @@ from app.blueprints.health import health_bp
 from app.blueprints.tags import tags_bp
 from app.database import db
 from app.exceptions import EntitiesNotFoundError, EntityDuplicatedError
+from app.services import _normalize_database_url
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(BASE_DIR / ".env")
@@ -32,18 +33,7 @@ logging.basicConfig(
 logger = logging.getLogger("article_manager")
 
 
-def _normalize_database_url(url: str) -> str:
-    """Render and others often use postgres:// or postgresql://; SQLAlchemy needs the psycopg3 driver prefix."""
-    if url.startswith("postgresql+psycopg://"):
-        return url
-    if url.startswith("postgres://"):
-        return "postgresql+psycopg://" + url.removeprefix("postgres://")
-    if url.startswith("postgresql://"):
-        return "postgresql+psycopg://" + url.removeprefix("postgresql://")
-    return url
-
-
-def create_app(test_config=None):
+def create_app(test_config=None) -> Flask:
     app = Flask(__name__)
 
     if test_config is not None:
@@ -111,7 +101,7 @@ def create_app(test_config=None):
         return jsonify({"error": str(error)}), 409
 
     @app.errorhandler(ValidationError)
-    def handle_validation_error(error):
+    def handle_validation_error(error: ValidationError):
         logger.warning(
             "Validation error on %s %s: %s",
             request.method,
@@ -121,7 +111,7 @@ def create_app(test_config=None):
         return jsonify({"error": error.errors()}), 422
 
     @app.errorhandler(EntitiesNotFoundError)
-    def handle_entities_not_found_error(error):
+    def handle_entities_not_found_error(error: EntitiesNotFoundError):
         logger.warning(
             "Entities not found on %s %s: missing_ids=%s",
             request.method,
@@ -131,7 +121,7 @@ def create_app(test_config=None):
         return jsonify({"error": str(error), "missing_ids": error.missing_ids}), 404
 
     @app.errorhandler(HTTPException)
-    def handle_http_exception(error):
+    def handle_http_exception(error: HTTPException):
         logger.warning(
             "HTTP %d on %s %s: %s",
             error.code,

@@ -28,13 +28,15 @@ def get_or_create_by_name[T: Base](model: type[T], name: str, user_id: int) -> T
     return entity
 
 
-def check_url_uniqueness(url: str, user_id: int, existing_id: int | None = None):
+def check_url_uniqueness(
+    url: str, user_id: int, existing_id: int | None = None
+) -> bool:
     stmt = select(Article).where(Article.url == url, Article.user_id == user_id)
     entity = db.session.execute(stmt).scalars().first()
     return entity is None or entity.id == existing_id
 
 
-def associate_tags(raw_tags: list[str], user_id: int):
+def associate_tags(raw_tags: list[str], user_id: int) -> list[str]:
     seen = set()
     tags = []
     for raw_tag in raw_tags:
@@ -84,9 +86,20 @@ def get_entities[T: Base](
     )
 
 
-def get_articles_by_author(author_id: int, user_id: int):
+def get_articles_by_author(author_id: int, user_id: int) -> list[Article]:
     stmt = select(Article).where(
         Article.author_id == author_id, Article.user_id == user_id
     )
     articles = db.session.execute(stmt).scalars().all()
     return articles
+
+
+def _normalize_database_url(url: str) -> str:
+    """Render and others often use postgres:// or postgresql://; SQLAlchemy needs the psycopg3 driver prefix."""
+    if url.startswith("postgresql+psycopg://"):
+        return url
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url.removeprefix("postgres://")
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url.removeprefix("postgresql://")
+    return url
