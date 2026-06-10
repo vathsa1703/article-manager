@@ -29,13 +29,7 @@ const {
     borderRadius: '0.75rem',
     color: isDarkMode ? '#e2e8f0' : '#0f172a',
   };
-  if (isArticlesLoading || isAuthorsLoading) {
-  return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-6 text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
-      Loading statistics...
-    </div>
-  );
-}
+
 
   const readPerMonth = useMemo<ReadByMonthStat[]>(() => {
     const counts = new Map<string, ReadByMonthStat>();
@@ -73,7 +67,13 @@ const {
   }, [articles]);
 
   const consultedCount = articles.filter((article) => article.consulted).length;
-
+  if (isArticlesLoading || isAuthorsLoading) {
+  return (
+    <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-6 text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
+      Loading statistics...
+    </div>
+  );
+}
   return (
     <div className="space-y-5">
       <PageHeader title="Stats" description="Understand reading trends across your article collection.">
